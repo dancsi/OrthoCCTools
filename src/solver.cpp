@@ -114,7 +114,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	int n = vertices.size(), m = 0;
+	size_t n = vertices.size(), m = 0;
 
 	degrees.resize(n, 0);
 	conn.resize(n);
