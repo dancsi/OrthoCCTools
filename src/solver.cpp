@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 		cerr<<"Input file not given\n";
 		exit(EXIT_FAILURE);
 		*/
-		fname = "random.out";
+		fname = "data/random.out";
 		n_peptides = 4096;
 	}
 
@@ -108,9 +108,13 @@ int main(int argc, char** argv)
 
 	for(int i=1;i<=n_peptides;i++)
 	{
-		for(int j=i;j<=n_peptides;j++)
+		if(score[i][i]<=c1) vertices.push_back(make_pair(i, i));
+		for(int j=i+1;j<=n_peptides;j++)
 		{
-			if(score[i][j]<=c1) vertices.push_back(make_pair(i, j));
+			if(score[i][j]<=c1 && 
+				score[i][i] >= c2 &&
+				score[j][j] >= c2) 
+				vertices.push_back(make_pair(i, j));
 		}
 	}
 
