@@ -1,3 +1,6 @@
+#Excluded folders
+papers/
+
 # Compiled Object files
 *.slo
 *.lo
@@ -73,3 +76,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+
