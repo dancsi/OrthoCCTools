@@ -21,7 +21,7 @@ namespace options
         fprintf(stderr, "Available options:\n");
         for(int i=0;i<4;i++)
         {
-            fprintf(stderr, "\t--%s %s\n", long_options[i].name, long_options[i].has_arg==required_argument?"PARAM":"");
+            fprintf(stderr, "\t--%s%s\n", long_options[i].name, long_options[i].has_arg==required_argument?"=PARAM":"");
         }
     }
     void parse(int argc, char **argv)

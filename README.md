@@ -7,8 +7,11 @@ Compile with
 g++ -std=c++11 src/solver.cpp -o solver
 ```
 
-Run with 
-
 ```shell
-solver interaction_matrix number_of_peptides
+USAGE: solver FILE [OPTIONS...]
+Available options:
+        --homo-only
+        --hetero-only
+        --binding-cutoff=PARAM
+        --nonbinding-cutoff=PARAM
 ```
