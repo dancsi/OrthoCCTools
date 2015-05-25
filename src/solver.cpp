@@ -140,11 +140,8 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		fprintf(stderr, "USAGE: %s FILE [OPTIONS...]\n", argv[0]);
-		//exit(0);
-		fname = "data/random.out";
-		fprintf(stderr, "Processing %s anyway\n", fname.data());
-		options::parse(argc, argv);
+		options::usage(argv);
+		exit(0);
 	}
 
 	{
