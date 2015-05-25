@@ -1,13 +1,10 @@
 #include <algorithm>
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <thread>
-#include <vector>
+#include "options.h"
 
 #define TRACE_LEVEL 1
 #define TRACE_MASK (TRACE_MASK_CLIQUE|TRACE_MASK_INITIAL)
@@ -15,25 +12,71 @@
 #include "mcqd_para/MaximumCliqueBase.h"
 #include "mcqd_para/ParallelMaximumClique.h"
 #include "mcqd_para/BB_GreedyColorSort.h"
-#include "mcqd_para/BB_ColorRSort.h"
 #include "mcqd_para/McrBB.h"
 
 using namespace std;
 
-const float c1 = -8.5, c2 = -7;
+float c1, c2;
+bool search_homodimers, search_heterodimers;
 
 string fname;
-int n_peptides;
+int n_peptides = 0;
 float score[4100][4100];
+
+map<string, int> peptide_id;
+vector<string> reverse_id;
 
 vector<pair<int, int> > vertices;
 vector<int> degrees;
 vector<vector<char> > conn;
 
+int get_id(string peptide)
+{
+	auto it = peptide_id.find(peptide);
+	if(it!=peptide_id.end())
+	{
+		return it->second;
+	}
+	else
+	{
+		peptide_id.insert(make_pair(peptide, n_peptides));
+		reverse_id.push_back(peptide);
+		n_peptides++;
+	}
+}
+
+bool parse_input(FILE* fin, char* id1, char* id2, float& score)
+{
+	char buf[50];
+	char *ret = fgets(buf, 49, fin);
+	if(feof(fin) || !ret) return false;
+
+	int len = strlen(buf);
+	if(len<5) return false;
+
+	int i=0;
+	while(i <len &&buf[i]!=',')
+	{
+		*id1++ = buf[i];
+		i++;
+	}
+	if(i==len) return false;
+	*id1 = 0; i++;
+	while(i<len && buf[i]!=',')
+	{
+		*id2++ = buf[i];
+		i++;
+	}
+	if(i==len) return false;
+	*id2 = 0; i++;
+	score = atof(buf+i);
+	return true;
+}
+
 string str(pair<int, int> p)
 {
 	stringstream ss;
-	ss<<"("<<p.first<<", "<<p.second<<")";
+	ss<<"("<<reverse_id[p.first]<<", "<<reverse_id[p.second]<<")";
 	return ss.str();
 }
 
@@ -60,16 +103,27 @@ void dump_dimacs(const char *fname, int n, int m)
 	fclose(fout);
 }
 
-void print_clique(int* clique, int clique_size)
+void print_clique(const BitstringSet& clique)
 {
 	stringstream ss;
-	ss<<"[ "<<str(vertices[clique[0]]);
-	for(int i=1;i<clique_size;i++)
-	{
-		ss<<", "<<str(vertices[clique[i]]);
-	}
-	ss<<" ]\n";
-	//printf("%s", ss.str().c_str());
+    bool comma = false;
+	ss<<"[ ";
+	BitstringSet bs = clique;
+
+	while(bs.size()>0)
+    {
+        int i = bs.nextSetBit();
+		bs.remove(i);
+        {
+            if(comma) ss<<", ";
+            else comma = true;
+            ss<<str(vertices[i]);
+        }
+    }
+    ss<<" ]\n";
+
+	printf("%s", ss.str().c_str());
+
 	FILE* fout = fopen("output.txt", "w");
 	fprintf(fout,"%s", ss.str().c_str());
 	fclose(fout);
@@ -78,45 +132,72 @@ void print_clique(int* clique, int clique_size)
 int main(int argc, char** argv)
 {
 	clock_t start_time = clock();
+
 	if(argc>1)
 	{
 		fname = string(argv[1]);
-		if(argc>2)
-		{
-			sscanf(argv[2], "%d", &n_peptides);
-		}
+		options::parse(argc-1, argv+1);
 	}
 	else
-	{	
-		/*
-		cerr<<"Input file not given\n";
-		exit(EXIT_FAILURE);
-		*/
+	{
+		fprintf(stderr, "USAGE: %s FILE [OPTIONS...]\n", argv[0]);
+		//exit(0);
 		fname = "data/random.out";
-		n_peptides = 4096;
+		fprintf(stderr, "Processing %s anyway\n", fname.data());
+		options::parse(argc, argv);
 	}
+
+	{
+		c1 = options::get("binding-cutoff", -8.5f);
+		c2 = options::get("nonbinding-cutoff", -7.f);
+		search_homodimers = !options::get("hetero-only", false);
+		search_heterodimers = !options::get("homo-only", false);
+		if(!(search_homodimers || search_heterodimers))
+		{
+			fprintf(stderr, "You can not disable both homo- and heterodimer search\n");
+			exit(0);
+		}
+	}
+
 
 	FILE* fin = fopen(fname.c_str(), "r");
 
 	int id1, id2;
 	float _score;
-	while(fscanf(fin, "P%d,P%d,%f\n", &id1, &id2, &_score)==3)
+	char id1s[20], id2s[20];
+
+	while(parse_input(fin, id1s, id2s, _score))
 	{
+		id1 = get_id(id1s);
+		id2 = get_id(id2s);
+
 		score[id1][id2] = score[id2][id1] = _score;
 	}
 	fclose(fin);
 
-	for(int i=1;i<=n_peptides;i++)
+	cerr<<n_peptides<<" peptides\n";
+
+	if(search_homodimers)
 	{
-		if(score[i][i]<=c1) vertices.push_back(make_pair(i, i));
-		for(int j=i+1;j<=n_peptides;j++)
+		for(int i=0;i<n_peptides;i++)
 		{
-			if(score[i][j]<=c1 && 
-				score[i][i] >= c2 &&
-				score[j][j] >= c2) 
-				vertices.push_back(make_pair(i, j));
+			if(score[i][i]<=c1) vertices.push_back(make_pair(i, i));
 		}
 	}
+	if(search_heterodimers)
+	{
+		for(int i=0;i<n_peptides;i++)
+		{
+			for(int j=i+1;j<n_peptides;j++)
+			{
+				if(score[i][j]<=c1 &&
+				   score[i][i] >= c2 &&
+				   score[j][j] >= c2)
+					vertices.push_back(make_pair(i, j));
+			}
+		}
+	}
+
 
 	size_t n = vertices.size(), m = 0;
 
@@ -146,7 +227,7 @@ int main(int argc, char** argv)
 	ParallelMaximumCliqueProblem<
             int,                        // vertex ID
             BitstringSet,               // vertex set
-            Graph<BitstringSet>,        // graph      
+            Graph<BitstringSet>,        // graph
             BBGreedyColorSort<Graph<BitstringSet>>,        // color sort
             BBMcrSort        // initial sort
             > problem(graph);
@@ -156,14 +237,9 @@ int main(int argc, char** argv)
     printf("Running on %d threads, %d jobs\n", n_threads, n_jobs);
 
     problem.search(n_threads, n_jobs, affinities);
-    problem.outputStatistics(false); std::cout << "\n"; 
+    problem.outputStatistics(false); std::cout << "\n";
     std::cout << "Thread efficiency = " << std::setprecision(3) << problem.workerEfficiency() << "\n\n";
-	/*
-	Maxclique mm(conn, n, print_clique);
-	int clique_size;
-	int * clique = new int[n];
-	mm.mcqdyn(clique, clique_size);
-	*/
+    print_clique(problem.getClique());
 
 	clock_t stop_time = clock();
 	printf( "Total elapsed time: %.2lfs\n", double(stop_time - start_time)/CLOCKS_PER_SEC);

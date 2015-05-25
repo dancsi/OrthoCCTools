@@ -17,6 +17,7 @@ set(SOURCE_FILES
     mcqd_para/ParallelMaximumClique.h
     mcqd_para/SteadyGreedyColorSort.h
     mcqd_para/Timer.h
+    options.h
     solver.cpp)
 
 add_executable(solver ${SOURCE_FILES})
