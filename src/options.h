@@ -3,11 +3,12 @@
 #include <map>
 
 #include <getopt.h>
-
+#include <cstdio>
 using namespace std;
 
 namespace options
 {
+
     option long_options[] = {
             {"homo-only", no_argument, nullptr, 0},
             {"hetero-only", no_argument, nullptr, 0},
