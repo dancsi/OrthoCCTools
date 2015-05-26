@@ -41,7 +41,7 @@ int get_id(string peptide)
 	{
 		peptide_id.insert(make_pair(peptide, n_peptides));
 		reverse_id.push_back(peptide);
-		n_peptides++;
+		return n_peptides++;
 	}
 }
 
