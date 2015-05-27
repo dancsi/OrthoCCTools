@@ -73,13 +73,6 @@ bool parse_input(FILE* fin, char* id1, char* id2, float& score)
 	return true;
 }
 
-string str(pair<int, int> p)
-{
-	stringstream ss;
-	ss<<"("<<reverse_id[p.first]<<", "<<reverse_id[p.second]<<")";
-	return ss.str();
-}
-
 bool will_interact(pair<int, int> a, pair<int, int> b)
 {
 	int u1 = a.first, u2 = a.second, v1 = b.first, v2 = b.second;
@@ -107,7 +100,6 @@ void print_clique(const BitstringSet& clique)
 {
 	stringstream ss;
     bool comma = false;
-	ss<<"[ ";
 	BitstringSet bs = clique;
 
 	while(bs.size()>0)
@@ -115,13 +107,11 @@ void print_clique(const BitstringSet& clique)
         int i = bs.nextSetBit();
 		bs.remove(i);
         {
-            if(comma) ss<<", ";
-            else comma = true;
-            ss<<str(vertices[i]);
+            auto p = vertices[i];
+            ss<<reverse_id[p.first]<<","<<reverse_id[p.second]<<"\n";
         }
     }
-    ss<<" ]\n";
-
+    
 	printf("%s", ss.str().c_str());
 
 	FILE* fout = fopen("output.txt", "w");
