@@ -13,14 +13,15 @@ namespace options
             {"homo-only", no_argument, nullptr, 0},
             {"hetero-only", no_argument, nullptr, 0},
             {"binding-cutoff", required_argument, nullptr, 0 },
-            {"nonbinding-cutoff", required_argument, nullptr, 0}
+            {"nonbinding-cutoff", required_argument, nullptr, 0},
+            {"out-name", required_argument, nullptr, 0},
     };
     map<string, string> opt_map;
     void usage(char** argv)
     {
         fprintf(stderr, "USAGE: %s FILE [OPTIONS...]\n", argv[0]);
         fprintf(stderr, "Available options:\n");
-        for(int i=0;i<4;i++)
+        for(int i=0;i<5;i++)
         {
             fprintf(stderr, "\t--%s%s\n", long_options[i].name, long_options[i].has_arg==required_argument?"=PARAM":"");
         }
