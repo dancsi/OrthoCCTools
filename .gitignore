@@ -1,6 +1,7 @@
 #Excluded folders
 papers/
 src/.idea
+build/
 
 # Compiled Object files
 *.slo

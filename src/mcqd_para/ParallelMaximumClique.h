@@ -24,6 +24,12 @@
 #include <memory>
 #include <deque> // TODO: test deque vs. vector for storing a queue of jobs
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 
 using std::swap;
 

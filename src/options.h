@@ -1,9 +1,14 @@
 #pragma once
 
 #include <map>
-
-#include <getopt.h>
 #include <cstdio>
+
+#ifdef _MSC_VER
+#include "getopt.h"
+#else
+#include <getopt.h>
+#endif
+
 using namespace std;
 
 namespace options

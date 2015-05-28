@@ -96,7 +96,7 @@ protected:
 
 
 // for windows users that have a function called KillTimer
-typedef KillTimer KillTimer1;
-
+//typedef KillTimer KillTimer1;
+using KillTimer1 = class KillTimer;
 
 #endif // KILLTIMER_H_INCLUDED
