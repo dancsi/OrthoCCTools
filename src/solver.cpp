@@ -21,6 +21,7 @@ bool search_homodimers, search_heterodimers;
 
 string fname;
 string out_name;
+
 int n_peptides = 0;
 float score[4100][4100];
 
@@ -143,7 +144,7 @@ int main(int argc, char** argv)
 		c2 = options::get("nonbinding-cutoff", -7.f);
 		search_homodimers = !options::get("hetero-only", false);
 		search_heterodimers = !options::get("homo-only", false);
-		//out_name = options::get("out-name", "output.txt");
+		out_name = options::get("out-name", string("output.txt"));
 		if(!(search_homodimers || search_heterodimers))
 		{
 			fprintf(stderr, "You can not disable both homo- and heterodimer search\n");

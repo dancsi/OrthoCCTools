@@ -26,7 +26,7 @@ namespace options
     {
         fprintf(stderr, "USAGE: %s FILE [OPTIONS...]\n", argv[0]);
         fprintf(stderr, "Available options:\n");
-        for(int i=0;i<5;i++)
+        for(int i=0;i<sizeof(long_options)/sizeof(option);i++)
         {
             fprintf(stderr, "\t--%s%s\n", long_options[i].name, long_options[i].has_arg==required_argument?"=PARAM":"");
         }
