@@ -65,3 +65,13 @@ def test_homoP1P5():
     ensure_output()   
     pairs = load_set_file("output.txt")     
     assert len(pairs)==4
+    
+def test_homo2hetero2():
+    call("solver data/tests/homo2-hetero2.out --binding-cutoff=-8.5 --nonbinding-cutoff=-7.5")
+    ensure_output()   
+    pairs = load_set_file("output.txt")     
+    target_pairs =[["P1","P2"],
+                   ["P3","P4"],
+                   ["P5","P5"],
+                   ["P6","P6"]]    
+    assert pairs_equal(pairs, target_pairs)
