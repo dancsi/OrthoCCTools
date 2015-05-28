@@ -31,6 +31,10 @@ src/.idea
 *.out
 *.app
 
+#Python cache files
+*.pyc
+.ipynb_checkpoints
+
 # =========================
 # Operating System Files
 # =========================
