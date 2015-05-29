@@ -99,7 +99,7 @@ void dump_dimacs(const char *fname, int n, int m)
 }
 
 
-void print_clique(const BitstringSet& clique, Graph<BitstringSet>& graph)
+void print_clique(const string out_name, const BitstringSet& clique, Graph<BitstringSet>& graph)
 {
 	stringstream ss;
     bool comma = false;
@@ -119,7 +119,7 @@ void print_clique(const BitstringSet& clique, Graph<BitstringSet>& graph)
 
 	printf("%s", ss.str().c_str());
 
-	FILE* fout = fopen("output.txt", "w");
+	FILE* fout = fopen(out_name.c_str(), "w");
 	fprintf(fout,"%s", ss.str().c_str());
 	fclose(fout);
 }
@@ -231,7 +231,7 @@ int main(int argc, char** argv)
     problem.search(n_threads, n_jobs, affinities);
     problem.outputStatistics(false); std::cout << "\n";
     std::cout << "Thread efficiency = " << std::setprecision(3) << problem.workerEfficiency() << "\n\n";
-    print_clique(problem.getClique(), graph);
+    print_clique(out_name, problem.getClique(), graph);
 
 	clock_t stop_time = clock();
 	printf( "Total elapsed time: %.2lfs\n", double(stop_time - start_time)/CLOCKS_PER_SEC);
