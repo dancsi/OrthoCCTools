@@ -20,6 +20,7 @@ namespace options
             {"binding-cutoff", required_argument, nullptr, 0 },
             {"nonbinding-cutoff", required_argument, nullptr, 0},
             {"out-name", required_argument, nullptr, 0},
+			{"initial-set", required_argument, nullptr, 0 },
     };
     map<string, string> opt_map;
     void usage(char** argv)

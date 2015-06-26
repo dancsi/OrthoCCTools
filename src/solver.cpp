@@ -8,6 +8,7 @@
 
 #define TRACE_LEVEL 1
 #define TRACE_MASK (TRACE_MASK_CLIQUE|TRACE_MASK_INITIAL)
+#define PEPTIDE_LENGTH 200
 
 #include "mcqd_para/MaximumCliqueBase.h"
 #include "mcqd_para/ParallelMaximumClique.h"
@@ -19,7 +20,7 @@ using namespace std;
 float c1, c2;
 bool search_homodimers, search_heterodimers;
 
-string fname;
+string fname, initial_set_fname;
 string out_name;
 
 int n_peptides = 0;
@@ -28,7 +29,7 @@ float score[4100][4100];
 map<string, int> peptide_id;
 vector<string> reverse_id;
 
-vector<pair<int, int> > vertices;
+vector<pair<int, int> > vertices, initial_set;
 vector<int> degrees;
 vector<vector<char> > conn;
 
@@ -49,8 +50,8 @@ int get_id(string peptide)
 
 bool parse_input(FILE* fin, char* id1, char* id2, float& score)
 {
-	char buf[50];
-	char *ret = fgets(buf, 49, fin);
+	char buf[2*PEPTIDE_LENGTH + 10];
+	char *ret = fgets(buf, sizeof(buf) - 1, fin);
 	if(feof(fin) || !ret) return false;
 
 	int len = strlen(buf);
@@ -117,11 +118,51 @@ void print_clique(const string out_name, const BitstringSet& clique, Graph<Bitst
         }
     }
 
+	for (pair<int, int>& p : initial_set)
+	{
+		ss << reverse_id[p.first] << "," << reverse_id[p.second] << "\n";
+	}
+
 	printf("%s", ss.str().c_str());
 
 	FILE* fout = fopen(out_name.c_str(), "w");
 	fprintf(fout,"%s", ss.str().c_str());
 	fclose(fout);
+}
+
+void read_initial_set()
+{
+	if (initial_set_fname.empty()) return;
+	FILE* fin = fopen(initial_set_fname.c_str(), "r");
+	if (fin == nullptr) return;
+	fprintf(stderr, "Reading initial set from %s\n", initial_set_fname.c_str());
+
+	char p1[PEPTIDE_LENGTH], p2[PEPTIDE_LENGTH];
+	while (fscanf(fin, "%[^,],%s\n", p1, p2) != EOF)
+	{
+		auto it1 = peptide_id.find(string(p1));
+		auto it2 = peptide_id.find(string(p2));
+		if (it1 == peptide_id.end() || it2 == peptide_id.end())
+		{
+			initial_set.clear();
+			fprintf(stderr, "Invalid peptide ID %s, aborting.", (it1==peptide_id.end())?p1:p2);
+			exit(1);
+		}
+
+		auto newpair = make_pair(it1->second, it2->second);
+		if (newpair.first > newpair.second) swap(newpair.first, newpair.second);
+		initial_set.push_back( newpair );
+	}
+
+	fclose(fin);
+}
+
+bool will_interact_with_initial(pair<int, int> potential_pair)
+{
+	return any_of(initial_set.begin(), initial_set.end(), 
+		[&potential_pair](pair<int, int>& initial_pair) {
+			return will_interact(potential_pair, initial_pair);
+		});
 }
 
 int main(int argc, char** argv)
@@ -150,13 +191,14 @@ int main(int argc, char** argv)
 			fprintf(stderr, "You can not disable both homo- and heterodimer search\n");
 			exit(0);
 		}
+		initial_set_fname = options::get("initial-set", string(""));
 	}
 
 	FILE* fin = fopen(fname.c_str(), "r");
 
 	int id1, id2;
 	float _score;
-	char id1s[20], id2s[20];
+	char id1s[PEPTIDE_LENGTH], id2s[PEPTIDE_LENGTH];
 
 	while(parse_input(fin, id1s, id2s, _score))
 	{
@@ -169,11 +211,13 @@ int main(int argc, char** argv)
 
 	cerr<<n_peptides<<" peptides\n";
 
+	read_initial_set();
+
 	if(search_homodimers)
 	{
 		for(int i=0;i<n_peptides;i++)
 		{
-			if(score[i][i]<=c1) vertices.push_back(make_pair(i, i));
+			if(score[i][i]<=c1 && !will_interact_with_initial(make_pair(i, i))) vertices.push_back(make_pair(i, i));
 		}
 	}
 	if(search_heterodimers)
@@ -184,7 +228,7 @@ int main(int argc, char** argv)
 			{
 				if(score[i][j]<=c1 &&
 				   score[i][i] >= c2 &&
-				   score[j][j] >= c2)
+				   score[j][j] >= c2 && !will_interact_with_initial(make_pair(i, j)))
 					vertices.push_back(make_pair(i, j));
 			}
 		}
@@ -192,6 +236,15 @@ int main(int argc, char** argv)
 
 
 	size_t n = vertices.size(), m = 0;
+	if (n == 0)
+	{
+		cerr << "Orthogonal set impossible with given constraints, aborting.\n";
+		exit(1);
+	}
+	else
+	{
+		cerr << "Running max_clique on " << n << " vertices\n";
+	}
 
 	degrees.resize(n, 0);
 	conn.resize(n);
