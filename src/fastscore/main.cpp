@@ -10,9 +10,6 @@ int main() {
 	Interaction *inter = new Interaction();
 	inter->init_complete_score(); 
 	//cout << inter->weights["AA"]["AA"] << endl;
-	inter->get_heptad();
-	inter->get_duplets();
-	inter->get_triplets();
 	//heptadi so ok
 	/*for(int i=0;i<205;i++) {
 		cout << inter->hi[i] << " ";

@@ -230,4 +230,8 @@ void Interaction::init_complete_score(void){
 		}
 	}
 	in.close();
+
+	this->get_heptad();
+	this->get_duplets();
+	this->get_triplets();
 }
