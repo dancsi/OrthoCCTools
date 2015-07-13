@@ -3,8 +3,11 @@
 #include "interaction.h"
  %}
  
- %include <cstring.i>
  
+ %include "std_string.i"
+using namespace std;
+
+
 class Interaction {
 	private:
 		char hpos; //kaze covjek da ne mijenjam

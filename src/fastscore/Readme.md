@@ -3,3 +3,7 @@
 ## Build the test ##
 
 g++ main.cpp Interaction.cpp -o test
+
+## Swig wrapper ##
+
+Just run ./make.sh
