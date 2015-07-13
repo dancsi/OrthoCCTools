@@ -18,7 +18,8 @@ int main() {
 	//cout << inter->ha.size() << " " << inter->duplets.size() << " " << inter->triplets.size() << endl;
 
 	//DEIQALEEENAQLEQENAALEEEIAQLEYG
-	cout << inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "DKIAQLKQKIQALKQENQQLEEENAALEYG") << endl;
+	printf("%a", inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "DKIAQLKQKIQALKQENQQLEEENAALEYG"));
+	std::cout << inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "DKIAQLKQKIQALKQENQQLEEENAALEYG") << endl;
 	cout << inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "DENAALEEKIAQLKQKNAALKEEIQALEYG") << endl;
 	cout << inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "-KNAQLKEKIAALKEKIQQLKEENQALEYG") << endl;
 

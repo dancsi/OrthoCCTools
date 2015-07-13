@@ -57,7 +57,7 @@ class Interaction {
 			len = 100;
 			memset(hi,0,sizeof(hi));
 		}
-		void heptad_array();
+		//void heptad_array();
 		int hi[205];
 		vector<char>ha;
 		vector<triplet_list> triplets;
@@ -68,8 +68,8 @@ class Interaction {
 		void get_duplets(void);
 		void get_triplets(void);
 		float score_complete(string,string);
-		float score_rfe();
-		float score_fong_svm();
+		//float score_rfe();
+		//float score_fong_svm();
 };
 
 #endif
