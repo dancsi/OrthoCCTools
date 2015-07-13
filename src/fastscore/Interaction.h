@@ -10,6 +10,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <stdexcept>
 
 using namespace std;
 

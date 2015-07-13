@@ -214,6 +214,7 @@ void Interaction::init_complete_score(void){
 	ifstream in("alll.in");
 	if(!in){
 		cout << "Could not open file" << endl;
+		throw std::invalid_argument( "Could not open file with weigts alll.in" );
 		return;
 	}
 	multimap<string,map<string,float> >::iterator it;
