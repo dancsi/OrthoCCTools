@@ -6,10 +6,13 @@ from Bio import SeqIO
 
 parser = argparse.ArgumentParser(description="Generate some peptides")
 parser.add_argument('-n', type=int, metavar='num', default=None, help="Number of peptides. If not present, all possible will be generated")
+parser.add_argument('-np', type=int, metavar='num', default=4, help="Number of hepdates.")
+
 #parser.add_argument('--full', action='store_true', default=False, help="Use the full interaction set (off by default)")
 args = parser.parse_args()
 
 n = args.n;
+np = args.np;
 
 def iter_sample_fast(iterable, samplesize):
     results = []
@@ -29,7 +32,7 @@ def iter_sample_fast(iterable, samplesize):
 
 heptads = [''.join(['A', g, a, 'A', 'A', 'L', e]) for g in 'EK' for a in 'IN' for e in 'EK']
 
-peptides = itertools.product(heptads, repeat=4)
+peptides = itertools.product(heptads, repeat=np)
 if n!=None:
     peptides = random.sample(list(peptides), n)
     #peptides = iter_sample_fast(peptides, n)

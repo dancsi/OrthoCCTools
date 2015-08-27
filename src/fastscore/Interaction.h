@@ -7,10 +7,10 @@
 #include <map>
 #include <algorithm>
 #include <cstring>
+#include <string>
 #include <vector>
 #include <cmath>
 #include <fstream>
-#include <stdexcept>
 
 using namespace std;
 
@@ -49,16 +49,17 @@ class Interaction {
 	private:
 		char hpos; //kaze covjek da ne mijenjam
 		int len;
-
+		string readFile;
 
 
 	public:
-		Interaction(){
+		Interaction(string rFile){
 			hpos = 'f';
 			len = 100;
 			memset(hi,0,sizeof(hi));
+			readFile = rFile;
 		}
-		//void heptad_array();
+		void heptad_array();
 		int hi[205];
 		vector<char>ha;
 		vector<triplet_list> triplets;
@@ -69,8 +70,8 @@ class Interaction {
 		void get_duplets(void);
 		void get_triplets(void);
 		float score_complete(string,string);
-		//float score_rfe();
-		//float score_fong_svm();
+		float score_rfe();
+		float score_fong_svm();
 };
 
 #endif

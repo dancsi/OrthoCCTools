@@ -1,27 +1,142 @@
 #include <iostream>
+#include <cerrno>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <thread>
+#include <omp.h>
 #include "Interaction.h"
+
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <io.h>
+#ifdef _MSC_VER
+#include "mman.h"
+#define open _open
+#define O_CREAT _O_CREAT
+#define O_BINARY _O_BINARY
+#define O_RDWR _O_RDWR
+#define O_TRUNC _O_TRUNC
+#define S_IWRITE _S_IWRITE
+#else
+#include <sys/mman.h>
+#endif
+
+#define MAXN 33000
 
 using namespace std;
 
-int main() {
 
-	Interaction *inter = new Interaction();
-	inter->init_complete_score(); 
-	//cout << inter->weights["AA"]["AA"] << endl;
-	//heptadi so ok
-	/*for(int i=0;i<205;i++) {
-		cout << inter->hi[i] << " ";
+void check(void);
+size_t N, num_of_threads;
+string fasta[MAXN];
+string names[MAXN];
+string fasta_name;
+Interaction *inter;
+int read_fasta(void);
+void calc(int, int, int);
+std::string get_name(int);
+
+int main(int argc, char **argv) {
+
+	if (argc > 1) {
+		fasta_name = string(argv[1]);
 	}
-	cout << endl;*/
-	//cout << inter->ha.size() << " " << inter->duplets.size() << " " << inter->triplets.size() << endl;
+	N = 0;
+	int ret = read_fasta();
+	if (ret < 0) {
+		return 0;
+	}
+	//cout << N << endl;
+	inter = new Interaction("alll.in");
+	inter->init_complete_score();
 
-	//DEIQALEEENAQLEQENAALEEEIAQLEYG
-	printf("%a", inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "DKIAQLKQKIQALKQENQQLEEENAALEYG"));
-	std::cout << inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "DKIAQLKQKIQALKQENQQLEEENAALEYG") << endl;
-	cout << inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "DENAALEEKIAQLKQKNAALKEEIQALEYG") << endl;
-	cout << inter->score_complete("DEIQALEEENAQLEQENAALEEEIAQLEYG", "-KNAQLKEKIAALKEKIQQLKEENQALEYG") << endl;
+	int fd = open("output.bin", O_CREAT | O_BINARY | O_RDWR | O_TRUNC, S_IWRITE);
+	size_t sz = (size_t)N*N*sizeof(float);
+	float *score = (float*)mmap(nullptr, sz, PROT_WRITE, MAP_SHARED, fd, 0);
 
+	float scr;
+	size_t done = 0;
+//#pragma omp parallel for private(scr)
+	for (int p = 0;p < N;p++)
+	{
+		if(omp_get_thread_num() == 0)
+		{
+			cout << done << " / " << N << endl;
+		}
+
+		for (int q = p;q < N;q++)
+		{
+			scr = inter->score_complete(fasta[p], fasta[q]);
+			score[N*p + q] = scr;
+			score[N*q + p] = scr;
+		}
+//#pragma omp atomic
+			done++;
+	}
+
+	munmap(score, sz);
 	return 0;
+}
+
+
+int read_fasta() {
+	N = 0;
+	string tmp;
+	ifstream in(fasta_name.c_str());
+	if (in.is_open()) {
+		while (in >> tmp) {
+			if (tmp.at(0) == '>') {
+				names[N] = tmp.substr(1);
+			}
+			else {
+				fasta[N] = tmp;
+				N++;
+			}
+		}
+		in.close();
+		return 0;
+	}
+	else {
+		return -1;
+	}
+}
+
+string get_name(int idx) {
+	string ret = "part";
+	ret.append(to_string(idx));
+	return ret;
+}
+
+//popravi granice i zdruzi fajlove
+
+void calc(int from, int to, int idx) {
+	ofstream out(get_name(idx).c_str());
+	int p = from / N;
+	int q = from%N;
+	int missed = p*(p + 1) / 2;
+	q += missed;
+	p += q / N;
+
+	for (int i = from;i < to;i++) {
+		if (i == (p + 1)*N - p*(p + 1) / 2) {
+			p++; q = p;
+		}
+		out << "P" << p + 1 << "," << "P" << q + 1 << " " << inter->score_complete(fasta[p], fasta[q]) << endl;
+		q++;
+	}
+	out.close();
+}
+
+void check() {
+	ofstream out("complete.out");
+	if (!out) return;
+	for (int i = 0;i < N;i++) {
+		for (int j = i;j < N;j++) {
+			out << fasta[i] << "," << fasta[j] << inter->score_complete(fasta[i], fasta[j]) << endl;
+		}
+	}
+	out.close();
 }

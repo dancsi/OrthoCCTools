@@ -20,4 +20,10 @@ set(SOURCE_FILES
     options.h
     solver.cpp)
 
+set(FASTSCORE_SOURCES
+    fastscore/Interaction.cpp
+    fastscore/Interaction.h
+    fastscore/main.cpp)
+
 add_executable(solver ${SOURCE_FILES})
+add_executable(fastscore ${FASTSCORE_SOURCES})

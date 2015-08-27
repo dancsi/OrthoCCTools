@@ -2,8 +2,7 @@
 
 
 bool cmp(rNCR a, rNCR b){
-	if(a.ii < b.ii || a.c1 < b.c1) return true;
-	return false;
+	return a.ii == b.ii ? a.c1 < b.c1 : a.ii < b.ii;
 }
 
 string uc(string str){
@@ -42,7 +41,7 @@ void Interaction::get_duplets(){
 		for(int j=0;j<len;j++){
 			if(abs(i-j) < 7) {
 				//cout << i << " " << j << endl;
-				cnt++;
+				//cnt++;
 				char h1 = ha[i%7];
 				char h2 = ha[j%7];
 				int i1 = i;
@@ -59,7 +58,7 @@ void Interaction::get_duplets(){
 					//cout << "Dodajem " << temp << endl;
 					duplets.push_back(duplet_list(i1,j1,temp));
 				}else {
-					//cnt ++;
+					cnt ++;
 					//cout << "Nisam nasao: " << temp << endl;
 				}
 			}
@@ -157,17 +156,20 @@ float Interaction::score_complete(string p1, string p2){
 		tmpp1.append("-");
 	}
 	seq.append(tmpp1);
-	//cout << seq << endl;
-	float score = 0;
+	//cout << seq << endl; - to je kul
+	float score = 0.0f;
 	//score duplets
 	for(int x=0;x<duplets.size();x++){
 		int i=duplets[x].i1;
 		int j=duplets[x].j1;
 		string xy = duplets[x].dup;
-		char tmp[3]; 
+		//char tmp[3]; 
 		//critical section
-		tmp[0] = seq.at(i); tmp[1] = seq.at(j);
-		string ab(tmp);
+		//cout << seq.at(i) << " " << seq.at(j) << endl;
+		//tmp[0] = seq.at(i); tmp[1] = seq.at(j);
+		string ab="";//(tmp);
+		ab.push_back(seq.at(i)); ab.push_back(seq.at(j));
+		//cout << xy << " " << ab << endl;
 		multimap<string,map<string,float> >:: iterator it;
 		it = weights.find(xy);
 		if(it!= weights.end()){
@@ -180,6 +182,7 @@ float Interaction::score_complete(string p1, string p2){
 			}
 		}
 	}
+	//cout << score << endl;
 	//duplets su u redu
 	//score triplets
 	int cnt = 0;
@@ -189,8 +192,9 @@ float Interaction::score_complete(string p1, string p2){
 		int k = triplets[x].k;
 		string xy = triplets[x].triad;
 
-		char tmp[4]; tmp[0] = seq.at(i); tmp[1] = seq.at(j); tmp[2] = seq.at(k);
-		string ab(tmp);
+		//char tmp[4]; tmp[0] = seq.at(i); tmp[1] = seq.at(j); tmp[2] = seq.at(k);
+		string ab="";//(tmp);
+		ab.push_back(seq.at(i)); ab.push_back(seq.at(j)); ab.push_back(seq.at(k));
 		//cout << ab << endl;
 		multimap<string,map<string,float> >::iterator it;
 		it = weights.find(xy);
@@ -211,16 +215,16 @@ float Interaction::score_complete(string p1, string p2){
 
 void Interaction::init_complete_score(void){
 	//ucitaj iz fajla
-	ifstream in("alll.in");
+	ifstream in(this->readFile);
 	if(!in){
 		cout << "Could not open file" << endl;
-		throw std::invalid_argument( "Could not open file with weigts alll.in" );
 		return;
 	}
 	multimap<string,map<string,float> >::iterator it;
 	string in1, in2;
 	float value;
 	while(in >> in1 >> in2 >> value) {
+		//cout << in1 << " " << in2 << endl;
 		it = weights.find(in1);
 		if(it != weights.end()) {
 			(*it).second.insert(make_pair(in2, value));
@@ -231,7 +235,6 @@ void Interaction::init_complete_score(void){
 		}
 	}
 	in.close();
-
 	this->get_heptad();
 	this->get_duplets();
 	this->get_triplets();
