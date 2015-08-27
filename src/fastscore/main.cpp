@@ -40,7 +40,7 @@ void calc(int, int, int);
 std::string get_name(int);
 
 int main(int argc, char **argv) {
-
+	clock_t start = clock();
 	if (argc > 1) {
 		fasta_name = string(argv[1]);
 	}
@@ -57,14 +57,20 @@ int main(int argc, char **argv) {
 	size_t sz = (size_t)N*N*sizeof(float);
 	float *score = (float*)mmap(nullptr, sz, PROT_WRITE, MAP_SHARED, fd, 0);
 
-	float scr;
-	size_t done = 0;
-//#pragma omp parallel for private(scr)
+	float scr, elapsed, speed;
+	size_t done = 0, prev = 0;
+	clock_t prev_clock = clock();
+	const float alpha = 0.5;
+#pragma omp parallel for private(scr)
 	for (int p = 0;p < N;p++)
 	{
 		if(omp_get_thread_num() == 0)
 		{
-			cout << done << " / " << N << endl;
+			elapsed = (float)(clock() - prev_clock) / CLOCKS_PER_SEC;
+			speed = (done - prev) / elapsed;
+			printf("%zd / %zd, %.2f per sec\n", done, N, speed);
+			prev = done;
+			prev_clock = clock();
 		}
 
 		for (int q = p;q < N;q++)
@@ -73,11 +79,14 @@ int main(int argc, char **argv) {
 			score[N*p + q] = scr;
 			score[N*q + p] = scr;
 		}
-//#pragma omp atomic
+#pragma omp atomic
 			done++;
 	}
 
 	munmap(score, sz);
+	clock_t stop = clock();
+	printf("%.2fs elapsed\n", float(stop-start) / CLOCKS_PER_SEC);
+
 	return 0;
 }
 

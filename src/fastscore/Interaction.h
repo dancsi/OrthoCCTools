@@ -64,7 +64,7 @@ class Interaction {
 		vector<char>ha;
 		vector<triplet_list> triplets;
 		vector<duplet_list>duplets;
-		multimap<string, map<string,float> >weights;
+		map<string, map<string,float> >weights;
 		void init_complete_score(void);
 		void get_heptad(void);
 		void get_duplets(void);

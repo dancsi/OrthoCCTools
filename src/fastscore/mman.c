@@ -73,11 +73,11 @@ void* mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off)
     const DWORD protect = __map_mmap_prot_page(prot);
     const DWORD desiredAccess = __map_mmap_prot_file(prot);
 
-    const off_t maxSize = off + (off_t)len;
+    const size_t maxSize = off + (size_t)len;
 
-    const DWORD dwMaxSizeLow = (sizeof(off_t) <= sizeof(DWORD)) ? 
+    const DWORD dwMaxSizeLow = (sizeof(size_t) <= sizeof(DWORD)) ? 
                     (DWORD)maxSize : (DWORD)(maxSize & 0xFFFFFFFFL);
-    const DWORD dwMaxSizeHigh = (sizeof(off_t) <= sizeof(DWORD)) ?
+    const DWORD dwMaxSizeHigh = (sizeof(size_t) <= sizeof(DWORD)) ?
                     (DWORD)0 : (DWORD)((maxSize >> 32) & 0xFFFFFFFFL);
 
 #ifdef _MSC_VER

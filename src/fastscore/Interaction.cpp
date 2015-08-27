@@ -36,7 +36,7 @@ void Interaction::get_heptad(void){
 void Interaction::get_duplets(){
 	int cnt = 0;
 	//cout << len << endl;
-	multimap<string,map<string,float> >::iterator it;
+	map<string,map<string,float> >::iterator it;
 	for(int i=0;i<len;i++){
 		for(int j=0;j<len;j++){
 			if(abs(i-j) < 7) {
@@ -120,7 +120,7 @@ void Interaction::get_triplets(void){
 					map<int,int>::iterator it2;
 					it2 = (*it1).second.find(b1);
 					if(it2 != (*it1).second.end() && (*it2).second == b2){
-						multimap<string,map<string,float> >::iterator it;
+						map<string,map<string,float> >::iterator it;
 						it = weights.find(uc(triad));
 						if(it!=weights.end()){
 							cnt++;
@@ -170,7 +170,7 @@ float Interaction::score_complete(string p1, string p2){
 		string ab="";//(tmp);
 		ab.push_back(seq.at(i)); ab.push_back(seq.at(j));
 		//cout << xy << " " << ab << endl;
-		multimap<string,map<string,float> >:: iterator it;
+		map<string,map<string,float> >:: iterator it;
 		it = weights.find(xy);
 		if(it!= weights.end()){
 			//cout << "Nasao xy: " << xy << " trazim: " << ab << endl;
@@ -196,7 +196,7 @@ float Interaction::score_complete(string p1, string p2){
 		string ab="";//(tmp);
 		ab.push_back(seq.at(i)); ab.push_back(seq.at(j)); ab.push_back(seq.at(k));
 		//cout << ab << endl;
-		multimap<string,map<string,float> >::iterator it;
+		map<string,map<string,float> >::iterator it;
 		it = weights.find(xy);
 		if(it!= weights.end()){
 			cnt ++;
@@ -220,7 +220,7 @@ void Interaction::init_complete_score(void){
 		cout << "Could not open file" << endl;
 		return;
 	}
-	multimap<string,map<string,float> >::iterator it;
+	map<string,map<string,float> >::iterator it;
 	string in1, in2;
 	float value;
 	while(in >> in1 >> in2 >> value) {
