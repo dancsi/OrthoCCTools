@@ -11,9 +11,10 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <io.h>
+
 #ifdef _MSC_VER
 #include "mman.h"
+#include <io.h>
 #define open _open
 #define O_CREAT _O_CREAT
 #define O_BINARY _O_BINARY
