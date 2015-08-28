@@ -16,6 +16,7 @@
 #include "mman.h"
 #include <io.h>
 #define open _open
+#define creat _creat
 #define O_CREAT _O_CREAT
 #define O_BINARY _O_BINARY
 #define O_RDWR _O_RDWR
@@ -23,6 +24,11 @@
 #define S_IWRITE _S_IWRITE
 #else
 #include <sys/mman.h>
+#endif
+
+#ifdef __unix
+#define O_BINARY 0
+#include <unistd.h>
 #endif
 
 #define MAXN 33000
@@ -54,9 +60,23 @@ int main(int argc, char **argv) {
 	inter = new Interaction("alll.in");
 	inter->init_complete_score();
 
-	int fd = open("output.bin", O_CREAT | O_BINARY | O_RDWR | O_TRUNC, S_IWRITE);
+	int fd = open("output.bin", O_CREAT | O_BINARY | O_RDWR | O_TRUNC, 0644);
+	if(fd == -1)
+	{
+		printf("ERROR open()-ing file:%s\n", strerror(errno));
+		exit(1);
+	}
+
 	size_t sz = (size_t)N*N*sizeof(float);
+	lseek64(fd, sz, SEEK_SET);
+	write(fd, "", 1);
+
 	float *score = (float*)mmap(nullptr, sz, PROT_WRITE, MAP_SHARED, fd, 0);
+	if(score == MAP_FAILED)
+	{
+		printf("ERROR mmap()-ing file:%s\n", strerror(errno));
+		exit(1);
+	}
 
 	float scr, elapsed, speed;
 	size_t done = 0, prev = 0;
