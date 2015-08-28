@@ -55,7 +55,7 @@ static DWORD __map_mmap_prot_file(const int prot)
     return desiredAccess;
 }
 
-void* mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off)
+void* mmap(void *addr, size_t len, int prot, int flags, int fildes, size_t off)
 {
     HANDLE fm, h;
     
@@ -66,9 +66,9 @@ void* mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off)
 #pragma warning(disable: 4293)
 #endif
 
-    const DWORD dwFileOffsetLow = (sizeof(off_t) <= sizeof(DWORD)) ? 
+    const DWORD dwFileOffsetLow = (sizeof(size_t) <= sizeof(DWORD)) ? 
                     (DWORD)off : (DWORD)(off & 0xFFFFFFFFL);
-    const DWORD dwFileOffsetHigh = (sizeof(off_t) <= sizeof(DWORD)) ?
+    const DWORD dwFileOffsetHigh = (sizeof(size_t) <= sizeof(DWORD)) ?
                     (DWORD)0 : (DWORD)((off >> 32) & 0xFFFFFFFFL);
     const DWORD protect = __map_mmap_prot_page(prot);
     const DWORD desiredAccess = __map_mmap_prot_file(prot);

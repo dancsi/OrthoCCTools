@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include <cerrno>
 #include <cstdlib>
 #include <cstdio>
@@ -12,23 +13,24 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef _MSC_VER
+#ifdef __unix
+#define O_BINARY 0
+#include <unistd.h>
+#include <sys/mman.h>
+#else
 #include "mman.h"
 #include <io.h>
+#endif
+
+#ifdef _MSC_VER
 #define open _open
 #define creat _creat
+#define lseek64 _lseeki64
 #define O_CREAT _O_CREAT
 #define O_BINARY _O_BINARY
 #define O_RDWR _O_RDWR
 #define O_TRUNC _O_TRUNC
 #define S_IWRITE _S_IWRITE
-#else
-#include <sys/mman.h>
-#endif
-
-#ifdef __unix
-#define O_BINARY 0
-#include <unistd.h>
 #endif
 
 #define MAXN 33000
@@ -46,8 +48,20 @@ int read_fasta(void);
 void calc(int, int, int);
 std::string get_name(int);
 
+typedef std::chrono::high_resolution_clock clock_type;
+std::chrono::time_point<clock_type> get_clock()
+{
+	return clock_type::now();
+}
+
+float time_diff(std::chrono::time_point<clock_type> from, std::chrono::time_point<clock_type> to)
+{
+	std::chrono::duration<float> dur = to - from;
+	return dur.count();
+}
+
 int main(int argc, char **argv) {
-	clock_t start = clock();
+	auto start = get_clock();
 	if (argc > 1) {
 		fasta_name = string(argv[1]);
 	}
@@ -80,18 +94,18 @@ int main(int argc, char **argv) {
 
 	float scr, elapsed, speed;
 	size_t done = 0, prev = 0;
-	clock_t prev_clock = clock();
+	auto prev_clock = get_clock();
 	const float alpha = 0.5;
 #pragma omp parallel for private(scr)
 	for (int p = 0;p < N;p++)
 	{
 		if(omp_get_thread_num() == 0)
 		{
-			elapsed = (float)(clock() - prev_clock) / CLOCKS_PER_SEC;
+			elapsed = time_diff(prev_clock, get_clock());
 			speed = (done - prev) / elapsed;
 			printf("%zd / %zd, %.2f per sec\n", done, N, speed);
 			prev = done;
-			prev_clock = clock();
+			prev_clock = get_clock();
 		}
 
 		for (int q = p;q < N;q++)
@@ -105,8 +119,8 @@ int main(int argc, char **argv) {
 	}
 
 	munmap(score, sz);
-	clock_t stop = clock();
-	printf("%.2fs elapsed\n", float(stop-start) / CLOCKS_PER_SEC);
+	auto stop = get_clock();
+	printf("%.2fs elapsed\n", time_diff(start, stop));
 
 	return 0;
 }
