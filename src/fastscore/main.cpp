@@ -92,11 +92,11 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	float scr, elapsed, speed;
+	float elapsed, speed;
 	size_t done = 0, prev = 0;
 	auto prev_clock = get_clock();
 	const float alpha = 0.5;
-#pragma omp parallel for private(scr)
+#pragma omp parallel for  schedule(guided)
 	for (int p = 0;p < N;p++)
 	{
 		if(omp_get_thread_num() == 0)
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
 		for (int q = p;q < N;q++)
 		{
-			scr = inter->score_complete(fasta[p], fasta[q]);
+			float scr = inter->score_complete(fasta[p], fasta[q]);
 			score[N*p + q] = scr;
 			score[N*q + p] = scr;
 		}
