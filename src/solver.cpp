@@ -4,11 +4,10 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
-#include "options.h"
 
-#define TRACE_LEVEL 1
-#define TRACE_MASK (TRACE_MASK_CLIQUE|TRACE_MASK_INITIAL)
-#define PEPTIDE_LENGTH 200
+#include "common.h"
+#include "options.h"
+#include "ioutil.h"
 
 #include "mcqd_para/MaximumCliqueBase.h"
 #include "mcqd_para/ParallelMaximumClique.h"
@@ -24,7 +23,7 @@ string fname, initial_set_fname;
 string out_name;
 
 int n_peptides = 0;
-float score[4100][4100];
+float **score;
 
 map<string, int> peptide_id;
 vector<string> reverse_id;
@@ -48,113 +47,12 @@ int get_id(string peptide)
 	}
 }
 
-bool parse_input(FILE* fin, char* id1, char* id2, float& score)
-{
-	char buf[2*PEPTIDE_LENGTH + 10];
-	char *ret = fgets(buf, sizeof(buf) - 1, fin);
-	if(feof(fin) || !ret) return false;
-
-	int len = strlen(buf);
-	if(len<5) return false;
-
-	int i=0;
-	while(i <len &&buf[i]!=',')
-	{
-		*id1++ = buf[i];
-		i++;
-	}
-	if(i==len) return false;
-	*id1 = 0; i++;
-	while(i<len && buf[i]!=',')
-	{
-		*id2++ = buf[i];
-		i++;
-	}
-	if(i==len) return false;
-	*id2 = 0; i++;
-	score = atof(buf+i);
-	return true;
-}
-
 bool will_interact(pair<int, int> a, pair<int, int> b)
 {
 	int u1 = a.first, u2 = a.second, v1 = b.first, v2 = b.second;
 	if(u1 == v1 || u1 == v2 || u2 == v1 || u2 == v2) return true;
 	if(score[u1][v1]<c2 || score[u1][v2]<c2 || score[u2][v1]<c2 || score[u2][v2]<c2 ) return true;
 	return false;
-}
-
-void dump_dimacs(const char *fname, int n, int m)
-{
-	FILE* fout = fopen(fname, "w");
-	fprintf(fout, "p edge %d %d\n", n, m);
-	for(int i=0;i<n;i++)
-	{
-		for(int j=0;j<i;j++)
-		{
-			if(conn[i][j])
-				fprintf(fout, "e %d %d\n", i+1, j+1);
-		}
-	}
-	fclose(fout);
-}
-
-
-void print_clique(const string out_name, const BitstringSet& clique, Graph<BitstringSet>& graph)
-{
-	stringstream ss;
-    bool comma = false;
-	BitstringSet bs = clique;
-
-	graph.remap(bs); //VERY IMPORTANT!!!
-
-	while(bs.size()>0)
-    {
-        int i = bs.nextSetBit();
-		bs.remove(i);
-        {
-            auto p = vertices[i];
-            ss<<reverse_id[p.first]<<","<<reverse_id[p.second]<<"\n";
-        }
-    }
-
-	for (pair<int, int>& p : initial_set)
-	{
-		ss << reverse_id[p.first] << "," << reverse_id[p.second] << "\n";
-	}
-
-	printf("%s", ss.str().c_str());
-
-	FILE* fout = fopen(out_name.c_str(), "w");
-	fprintf(fout,"%s", ss.str().c_str());
-	fclose(fout);
-}
-
-void read_initial_set()
-{
-	if (initial_set_fname.empty()) return;
-	FILE* fin = fopen(initial_set_fname.c_str(), "r");
-	if (fin == nullptr) return;
-	fprintf(stderr, "Reading initial set from %s\n", initial_set_fname.c_str());
-
-	char p1[PEPTIDE_LENGTH], p2[PEPTIDE_LENGTH];
-	while (fscanf(fin, "%[^,],%s\n", p1, p2) != EOF)
-	{
-		auto it1 = peptide_id.find(string(p1));
-		auto it2 = peptide_id.find(string(p2));
-		if (it1 == peptide_id.end() || it2 == peptide_id.end())
-		{
-			initial_set.clear();
-			fprintf(stderr, "Invalid peptide ID %s, aborting.", (it1==peptide_id.end())?p1:p2);
-			exit(1);
-		}
-
-		auto newpair = make_pair(it1->second, it2->second);
-		if (newpair.first > newpair.second) swap(newpair.first, newpair.second);
-		initial_set.push_back( newpair );
-	}
-
-	fclose(fin);
 }
 
 bool will_interact_with_initial(pair<int, int> potential_pair)
@@ -194,21 +92,7 @@ int main(int argc, char** argv)
 		initial_set_fname = options::get("initial-set", string(""));
 	}
 
-	FILE* fin = fopen(fname.c_str(), "r");
-
-	int id1, id2;
-	float _score;
-	char id1s[PEPTIDE_LENGTH], id2s[PEPTIDE_LENGTH];
-
-	while(parse_input(fin, id1s, id2s, _score))
-	{
-		id1 = get_id(id1s);
-		id2 = get_id(id2s);
-
-		score[id1][id2] = score[id2][id1] = _score;
-	}
-	fclose(fin);
-
+	score = read_scores(fname);
 	cerr<<n_peptides<<" peptides\n";
 
 	read_initial_set();
