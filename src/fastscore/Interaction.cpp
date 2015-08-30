@@ -73,17 +73,17 @@ void Interaction::get_triplets(void) {
 	int ii, jj, kk;
 	int cnt = 0;
 	vector<char>chain; chain.push_back('A'); chain.push_back('B');
-	map<string, map<int, int> > triad_set;
-	triad_set["gde"][0] = 1;
-	triad_set["gae"][1] = 1;
-	triad_set["deg"][1] = 0;
-	triad_set["ega"][1] = 0;
-	triad_set["gad"][1] = 0;
-	triad_set["ade"][1] = 0;
-	triad_set["dga"][0] = 1;
-	triad_set["dea"][1] = 1;
-	triad_set["aad"][1] = 1;
-	triad_set["dda"][1] = 1;
+	map<string, pair<int, int> > triad_set;
+	triad_set["gde"] = {0, 1};
+	triad_set["gae"] = {1, 1};
+	triad_set["deg"] = {1, 0};
+	triad_set["ega"] = {1, 0};
+	triad_set["gad"] = {1, 0};
+	triad_set["ade"] = {1, 0};
+	triad_set["dga"] = {0, 1};
+	triad_set["dea"] = {1, 1};
+	triad_set["aad"] = {1, 1};
+	triad_set["dda"] = {1, 1};
 	for (int i = 0;i < len;i++) {
 		for (int j = i + 1;j < 2 * len;j++) {
 			for (int k = j + 1;k < 2 * len;k++) {
@@ -112,25 +112,14 @@ void Interaction::get_triplets(void) {
 				//triad je tudi ok
 				int b1 = (temp[0].c1 != temp[1].c1) ? 1 : 0;
 				int b2 = (temp[0].c1 != temp[2].c1) ? 1 : 0;
-				//cout << b1 << " " << b2 << endl;
-				//b ovi su ok
-				//cnt ++;
+
+				pair<int, int> what_to_find = { b1, b2 };
+
 				auto it1 = triad_set.find(triad);
 				if (it1 != triad_set.end()) {
-					auto it2 = (*it1).second.find(b1);
-					if (it2 != (*it1).second.end() && (*it2).second == b2) {
-						auto it = weights.find(uc(triad));
-						if (it != weights.end()) {
-							cnt++;
-							triplets.push_back(triplet_list(temp[0].i, temp[1].i, temp[2].i, uc(triad)));
-						}
-						else {
-
-						}
-					}
-					else {
-						//cout << "Nisam nasao " << triad << endl;
-						//cnt++;
+					if (it1->second == what_to_find && weights.find(uc(triad)) != weights.end()) {
+						cnt++;
+						triplets.push_back(triplet_list(temp[0].i, temp[1].i, temp[2].i, uc(triad)));
 					}
 				}
 			}
@@ -162,6 +151,8 @@ float Interaction::score_complete(string& p1, string& p2)
 		//tmp[0] = seq.at(i); tmp[1] = seq.at(j);
 		ab[0] = seq[i];
 		ab[1] = seq[j];
+
+
 		//cout << xy << " " << ab << endl;
 		auto it = weights.find(xy);
 		if (it != weights.end()) {
@@ -173,11 +164,11 @@ float Interaction::score_complete(string& p1, string& p2)
 			}
 		}
 	}
-	//cout << score << endl;
+
 	//duplets su u redu
 	//score triplets
 	int cnt = 0;
-	ab.reserve(3);
+	ab.resize(3);
 	for (int x = 0;x < triplets.size();x++) {
 		int i = triplets[x].i;
 		int j = triplets[x].j;

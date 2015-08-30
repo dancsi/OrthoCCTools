@@ -182,7 +182,7 @@ float **read_scores_binary(std::string score_file)
 	char buf[20];
 	for (int i = 0;i < n_peptides;i++)
 	{
-		sprintf(buf, "P%d", i);
+		sprintf(buf, "P%d", i+1);
 		get_id(buf);
 	}
 	return allocate_matrix_pointers(score_storage, n_peptides);

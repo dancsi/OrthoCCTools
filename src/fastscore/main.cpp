@@ -107,7 +107,6 @@ int main(int argc, char **argv) {
 	size_t done = 0, prev = 0;
 	auto prev_clock = get_clock();
 	const float alpha = 0.5;
-	omp_set_num_threads(1);
 #pragma omp parallel for  schedule(guided)
 	for (int p = 0;p < N;p++)
 	{
@@ -123,7 +122,6 @@ int main(int argc, char **argv) {
 		for (int q = p;q < N;q++)
 		{
 			float scr = inter->score_complete(fasta[p], fasta[q]);
-			printf("Score for %d, %d is %.2f\n", p, q, scr);
 			score[N*p + q] = scr;
 			score[N*q + p] = scr;
 		}
