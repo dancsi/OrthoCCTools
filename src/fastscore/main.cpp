@@ -74,7 +74,18 @@ int main(int argc, char **argv) {
 	inter = new Interaction("alll.in");
 	inter->init_complete_score();
 
-	int fd = open("output.bin", O_CREAT | O_BINARY | O_RDWR | O_TRUNC, 0644);
+	string out_name = fasta_name;
+	if (out_name.length() >= 5 && 0 == out_name.compare(out_name.length() - 6, 6, ".fasta"))
+	{
+		out_name.replace(out_name.length() - 5, 3, "bin");
+		out_name.pop_back(); out_name.pop_back();
+	}
+	else
+	{
+		out_name += ".bin";
+	}
+
+	int fd = open(out_name.c_str(), O_CREAT | O_BINARY | O_RDWR | O_TRUNC, 0644);
 	if(fd == -1)
 	{
 		printf("ERROR open()-ing file:%s\n", strerror(errno));
@@ -96,6 +107,7 @@ int main(int argc, char **argv) {
 	size_t done = 0, prev = 0;
 	auto prev_clock = get_clock();
 	const float alpha = 0.5;
+	omp_set_num_threads(1);
 #pragma omp parallel for  schedule(guided)
 	for (int p = 0;p < N;p++)
 	{
@@ -111,6 +123,7 @@ int main(int argc, char **argv) {
 		for (int q = p;q < N;q++)
 		{
 			float scr = inter->score_complete(fasta[p], fasta[q]);
+			printf("Score for %d, %d is %.2f\n", p, q, scr);
 			score[N*p + q] = scr;
 			score[N*q + p] = scr;
 		}
