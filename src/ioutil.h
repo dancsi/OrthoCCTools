@@ -30,6 +30,7 @@
 #define creat _creat
 #define lseek64 _lseeki64
 #define fstat64 _fstat64
+#define stat64 _stat64
 #define O_CREAT _O_CREAT
 #define O_BINARY _O_BINARY
 #define O_RDWR _O_RDWR
@@ -155,7 +156,7 @@ float **read_scores_binary(std::string score_file)
 		exit(EXIT_FAILURE);
 	}
 
-	struct _stat64 fileInfo = { 0 };
+	struct stat64 fileInfo = { 0 };
 
 	if (fstat64(fd, &fileInfo) == -1)
 	{
