@@ -32,6 +32,8 @@ vector<pair<int, int> > vertices, initial_set;
 vector<int> degrees;
 vector<vector<char> > conn;
 
+Graph<BitstringSet> graph;
+
 int get_id(string peptide)
 {
 	auto it = peptide_id.find(peptide);
@@ -62,6 +64,13 @@ bool will_interact_with_initial(pair<int, int> potential_pair)
 			return will_interact(potential_pair, initial_pair);
 		});
 }
+
+struct ProgressReporter
+{
+	void operator()(const BitstringSet& clique) {
+		print_clique("current_clique.txt", clique, graph);
+	};
+};
 
 int main(int argc, char** argv)
 {
@@ -150,7 +159,6 @@ int main(int argc, char** argv)
 		}
 	}
 
-	Graph<BitstringSet> graph;
 	graph.init(conn, degrees);
 
 	ParallelMaximumCliqueProblem<
@@ -158,8 +166,9 @@ int main(int argc, char** argv)
             BitstringSet,               // vertex set
             Graph<BitstringSet>,        // graph
             BBGreedyColorSort<Graph<BitstringSet>>,        // color sort
-            BBMcrSort        // initial sort
-            > problem(graph);
+            BBMcrSort ,       // initial sort
+            ProgressReporter  //user callback
+	> problem(graph);
 
     int n_threads = thread::hardware_concurrency(), n_jobs = 2*n_threads;
     std::vector<int> affinities;

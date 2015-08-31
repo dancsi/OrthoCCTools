@@ -1,5 +1,5 @@
 CC = g++
-ALL_CFLAGS = -std=c++11 -O3 -fopenmp -g $(CFLAGS)
+ALL_CFLAGS = -Wall -std=c++11 -O3 -fopenmp -g $(CFLAGS)
 SOURCES=main.cpp Interaction.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=fastscore

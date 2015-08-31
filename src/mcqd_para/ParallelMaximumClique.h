@@ -56,7 +56,8 @@ template<
     class Set_t, 
     class Graph_t, 
     class Sort_t,
-    template<class S> class InitialSort_t
+    template<class S> class InitialSort_t, 
+	class NewMaxCliqueCallback
 >
 class ParallelMaximumCliqueProblem : public InitialSort_t<Sort_t> {
 public:
@@ -445,13 +446,14 @@ protected:
     unsigned int saveSolution(const VertexSet& c) {
         unsigned int ret;
         // make a copy of clique
-        TRACE("Saving solution", TRACE_MASK_CLIQUE, 2);
-        TRACEVAR(c.size(), TRACE_MASK_CLIQUE, 2);
+        TRACE("Saving solution", TRACE_MASK_CLIQUE, 1);
+        TRACEVAR(c.size(), TRACE_MASK_CLIQUE, 1);
         {
             std::lock_guard<std::mutex> lk(mutexQ); 
             if (maxSize < c.size()) {
                 maxSize = c.size();
                 maxClique = c;
+				NewMaxCliqueCallback()(c);
             }
             ret = maxSize;
         }
