@@ -360,7 +360,7 @@ public:
     
     // run the search for max clique
     void search(unsigned int numThreads, unsigned int numJobs, std::vector<int>& affinities) {
-        killTimer.start(10000);
+        killTimer.start(10.0 * 24 * 60 * 60 ); //10 days :)
         ScopeTimer t(timer);
         VertexSet c; // clique
         VertexSet p; // working set of vertices
