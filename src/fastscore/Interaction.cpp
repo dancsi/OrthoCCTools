@@ -128,15 +128,20 @@ void Interaction::get_triplets(void) {
 	//cout << "Izvrsio sam se " << cnt << endl;
 }
 
-float Interaction::score_complete(string& p1, string& p2)
+float Interaction::score_complete(string& p1, string& p2, int alignment)
 {
-	static char seq[2 * len + 1] = 
-		"----------------------------------------------------------------------------------------------------" \
-		"----------------------------------------------------------------------------------------------------";
-#pragma omp threadprivate(seq)
+	char seq[2 * len + 1]; 
+	memset(seq, '-', sizeof(seq)); seq[2 * len] = 0;
 
 	memcpy(seq, p1.c_str(), p1.length());
-	memcpy(seq + len, p2.c_str(), p2.length());
+	if (alignment >= 0)
+	{
+		memcpy(seq + len + alignment, p2.c_str(), p2.length() - alignment);
+	}
+	else
+	{
+		memcpy(seq + len, p2.c_str() - alignment, p2.length() + alignment);
+	}
 
 	float score = 0.0f;
 	string ab(2, 0);

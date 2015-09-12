@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <functional>
+#include <numeric>
 #include <iostream>
 #include <chrono>
 #include <cerrno>
@@ -48,7 +51,7 @@ int read_fasta(void);
 void calc(int, int, int);
 std::string get_name(int);
 
-typedef std::chrono::high_resolution_clock clock_type;
+typedef std::chrono::system_clock clock_type;
 std::chrono::time_point<clock_type> get_clock()
 {
 	return clock_type::now();
@@ -58,6 +61,19 @@ float time_diff(std::chrono::time_point<clock_type> from, std::chrono::time_poin
 {
 	std::chrono::duration<float> dur = to - from;
 	return dur.count();
+}
+
+void* mmap_wrapper(const char* fname, size_t size)
+{
+	int fd = open(fname, O_CREAT | O_BINARY | O_RDWR | O_TRUNC, 0644);
+	if (fd == -1)
+	{
+		printf("ERROR open()-ing file:%s\n", strerror(errno));
+		exit(1);
+	}
+	lseek64(fd, size - 1, SEEK_SET);
+	write(fd, "", 1);
+	return mmap(nullptr, size, PROT_WRITE, MAP_SHARED, fd, 0);
 }
 
 int main(int argc, char **argv) {
@@ -74,29 +90,25 @@ int main(int argc, char **argv) {
 	inter = new Interaction("alll.in");
 	inter->init_complete_score();
 
-	string out_name = fasta_name;
-	if (out_name.length() >= 5 && 0 == out_name.compare(out_name.length() - 6, 6, ".fasta"))
+	string out_name, align_name, basename;
+
+	if (fasta_name.length() >= 5 && 0 == fasta_name.compare(fasta_name.length() - 6, 6, ".fasta"))
 	{
-		out_name.replace(out_name.length() - 5, 3, "bin");
-		out_name.pop_back(); out_name.pop_back();
+		basename = fasta_name.substr(0, fasta_name.length() - 6);
 	}
 	else
 	{
-		out_name += ".bin";
+		basename = fasta_name;
 	}
 
-	int fd = open(out_name.c_str(), O_CREAT | O_BINARY | O_RDWR | O_TRUNC, 0644);
-	if(fd == -1)
-	{
-		printf("ERROR open()-ing file:%s\n", strerror(errno));
-		exit(1);
-	}
+	out_name = basename + ".bin";
+	align_name = basename + ".align.bin";
 
 	size_t sz = (size_t)N*N*sizeof(float);
-	lseek64(fd, sz, SEEK_SET);
-	write(fd, "", 1);
 
-	float *score = (float*)mmap(nullptr, sz, PROT_WRITE, MAP_SHARED, fd, 0);
+	float *score = (float*)mmap_wrapper(out_name.c_str(), sz);
+	int8_t *align = (int8_t*)mmap_wrapper(align_name.c_str(), N*N);
+
 	if(score == MAP_FAILED)
 	{
 		printf("ERROR mmap()-ing file:%s\n", strerror(errno));
@@ -106,8 +118,7 @@ int main(int argc, char **argv) {
 	float elapsed, speed;
 	size_t done = 0, prev = 0;
 	auto prev_clock = get_clock();
-	const float alpha = 0.5;
-#pragma omp parallel for  schedule(guided)
+#pragma omp parallel for  schedule(dynamic, 10)
 	for (int p = 0;p < N;p++)
 	{
 		if(omp_get_thread_num() == 0)
@@ -121,15 +132,28 @@ int main(int argc, char **argv) {
 
 		for (int q = p;q < N;q++)
 		{
-			float scr = inter->score_complete(fasta[p], fasta[q]);
+			const int alignments[] = {-14, -7, 0, 7, 14};
+			float scores[5];
+			std::transform(begin(alignments), end(alignments), begin(scores),
+				[&p, &q](int align) {
+				return inter->score_complete(fasta[p], fasta[q], align);
+			});
+			int min_index = std::distance( begin(scores), std::min_element(begin(scores), end(scores)) );
+			float scr = scores[min_index];
+			int8_t alignment = alignments[min_index];
+
 			score[N*p + q] = scr;
 			score[N*q + p] = scr;
+			align[N*p + q] = alignment;
+			align[N*q + p] = alignment;
 		}
 #pragma omp atomic
 			done++;
 	}
 
 	munmap(score, sz);
+	munmap(align, N*N);
+
 	auto stop = get_clock();
 	printf("%.2fs elapsed\n", time_diff(start, stop));
 

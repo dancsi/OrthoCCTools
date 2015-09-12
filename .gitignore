@@ -83,5 +83,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-
+data/*
 *.bz2
+output.txt
