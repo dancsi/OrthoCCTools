@@ -453,7 +453,6 @@ protected:
             if (maxSize < c.size()) {
                 maxSize = c.size();
                 maxClique = c;
-				
             }
 
 			if (maxSize == c.size())

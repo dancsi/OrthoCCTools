@@ -77,7 +77,7 @@ struct ProgressReporter
 			max_count = clique.size();
 			overwrite = true;
 		}
-		print_clique("current_clique.txt", clique, graph, overwrite);
+		print_clique((out_name + ".current").c_str(), clique, graph, overwrite);
 	};
 };
 
