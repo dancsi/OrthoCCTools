@@ -82,7 +82,7 @@ void dump_dimacs(std::vector<std::vector<char>>& conn, const char *fname)
 	fclose(fout);
 }
 
-void print_clique(const string out_name, const BitstringSet& clique, Graph<BitstringSet>& graph)
+void print_clique(const string out_name, const BitstringSet& clique, Graph<BitstringSet>& graph, bool overwrite = true)
 {
 	stringstream ss;
 	bool comma = false;
@@ -107,8 +107,9 @@ void print_clique(const string out_name, const BitstringSet& clique, Graph<Bitst
 
 	printf("%s", ss.str().c_str());
 
-	FILE* fout = fopen(out_name.c_str(), "w");
+	FILE* fout = fopen(out_name.c_str(), overwrite? "w": "a");
 	fprintf(fout, "%s", ss.str().c_str());
+	if (!overwrite) fprintf(fout, "#######################\n");
 	fclose(fout);
 }
 

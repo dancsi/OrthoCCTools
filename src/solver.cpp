@@ -67,8 +67,17 @@ bool will_interact_with_initial(pair<int, int> potential_pair)
 
 struct ProgressReporter
 {
+	int max_count;
+	ProgressReporter() : max_count(0) {}
+
 	void operator()(const BitstringSet& clique) {
-		print_clique("current_clique.txt", clique, graph);
+		bool overwrite = false;
+		if (clique.size() > max_count)
+		{
+			max_count = clique.size();
+			overwrite = true;
+		}
+		print_clique("current_clique.txt", clique, graph, overwrite);
 	};
 };
 

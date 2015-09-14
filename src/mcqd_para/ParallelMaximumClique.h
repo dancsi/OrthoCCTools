@@ -201,7 +201,7 @@ public:
             TRACEVAR(localMaxSize, TRACE_MASK_CLIQUE, 2);
             while (notEmpty(job.numbers)) {
                 TRACEVAR(job.numbers.size(), TRACE_MASK_CLIQUE, 2);
-                if (job.estimatedMax <= localMaxSize || parent->killTimer.timedOut) {return;}
+                if (job.estimatedMax < localMaxSize || parent->killTimer.timedOut) {return;}
                 Job newJob;
                 auto v = topVertex(job.numbers, job.vertices);
                 popTop(job.numbers, job.vertices);
@@ -210,7 +210,7 @@ public:
                 
                 newJob.c = job.c;
                 newJob.c.add(v);
-                if (newJob.c.size() > localMaxSize) { // condition (newJob.vertices.size() == 0) is left out to make maxSize up to date at all times
+                if (newJob.c.size() >= localMaxSize) { // condition (newJob.vertices.size() == 0) is left out to make maxSize up to date at all times
                     localMaxSize = parent->saveSolution(newJob.c);
                 }
                 
@@ -453,8 +453,14 @@ protected:
             if (maxSize < c.size()) {
                 maxSize = c.size();
                 maxClique = c;
-				NewMaxCliqueCallback()(c);
+				
             }
+
+			if (maxSize == c.size())
+			{
+				NewMaxCliqueCallback()(c);
+			}
+
             ret = maxSize;
         }
         
