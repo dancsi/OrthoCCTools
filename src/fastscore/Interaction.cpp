@@ -1,6 +1,9 @@
 #include "Interaction.h"
+#include "hardcoded_scores.h"
 
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 bool cmp(rNCR a, rNCR b) {
 	return a.ii == b.ii ? a.c1 < b.c1 : a.ii < b.ii;
@@ -202,7 +205,8 @@ float Interaction::score_complete(string& p1, string& p2, int alignment)
 
 void Interaction::init_complete_score(void) {
 	//ucitaj iz fajla
-	ifstream in(this->readFile);
+	std::string scores_str = std::string(hardcoded_scores);
+	std::stringstream in(scores_str);
 	if (!in) {
 		cout << "Could not open file" << endl;
 		return;
@@ -221,7 +225,6 @@ void Interaction::init_complete_score(void) {
 			(*it).second.insert(make_pair(in2, value));
 		}
 	}
-	in.close();
 	this->get_heptad();
 	this->get_duplets();
 	this->get_triplets();

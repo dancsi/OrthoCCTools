@@ -1,3 +1,4 @@
+const char hardcoded_scores[] = R"(
 AA AA  0.03680
 AA AR  0.02155
 AA RA  0.02155
@@ -16577,3 +16578,4 @@ DDA VVI  0.00781
 DDA VVL  0.03049
 DDA VVK  0.00108
 DDA VVV  0.02019
+)";

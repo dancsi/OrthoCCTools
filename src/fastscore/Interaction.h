@@ -122,12 +122,10 @@ class Interaction {
 	private:
 		static const char hpos='f'; //kaze covjek da ne mijenjam
 		static const int len = 100;
-		string readFile;
 
 	public:
-		Interaction(string rFile){
+		Interaction(){
 			memset(hi,0,sizeof(hi));
-			readFile = rFile;
 		}
 		void heptad_array();
 		int hi[205];

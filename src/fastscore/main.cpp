@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 	//cout << N << endl;
-	inter = new Interaction("alll.in");
+	inter = new Interaction();
 	inter->init_complete_score();
 
 	string out_name, align_name, basename;
