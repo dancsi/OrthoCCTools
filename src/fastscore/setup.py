@@ -2,11 +2,12 @@
 
 from distutils.core import setup, Extension
 
-setup(name='fast',
+setup(name='fastscoreCC',
       version='0.1.0',
       description='Fast scoring function',
       author='Ajasja Ljubetic',
-      ext_modules=[Extension('_fastscoreCC', ['fastscoreCC.i', 'Interaction.cpp'],
-                             swig_opts=['-c++'])],
+      ext_modules=[Extension('_fastscoreCC', ['Interaction.cpp', 'fastscoreCC.i'],
+                             swig_opts=['-c++'], extra_compile_args=['-std=c++11', '-D_hypot=hypot'])
+                  ],
     #  py_modules=['fastscoreCC.py']
      )
