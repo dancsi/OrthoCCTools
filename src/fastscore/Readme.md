@@ -4,6 +4,8 @@
 
 g++ main.cpp Interaction.cpp -o test
 
+g++ score-fasta.cpp Interaction.cpp -o score-fasta
+
 ## Swig wrapper ##
 
 Just run ./make.sh
