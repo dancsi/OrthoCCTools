@@ -15,3 +15,7 @@ $(EXECUTABLE): $(OBJECTS)
 
 .cpp.o:
 	$(CC) -c $(ALL_CFLAGS) $< -o $@
+
+.PHONY: clean
+clean:
+	rm -f fastscore.exe *.o
