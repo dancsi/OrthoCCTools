@@ -203,7 +203,7 @@ void calc(int from, int to, int idx) {
 		if (i == (p + 1)*N - p*(p + 1) / 2) {
 			p++; q = p;
 		}
-		out << "P" << p + 1 << "," << "P" << q + 1 << " " << inter->score_complete(fasta[p], fasta[q]) << endl;
+		out << "P" << p + 1 << "," << "P" << q + 1 << " " << inter->score_complete(fasta[p], fasta[q], 0) << endl;
 		q++;
 	}
 	out.close();
@@ -214,7 +214,7 @@ void check() {
 	if (!out) return;
 	for (int i = 0;i < N;i++) {
 		for (int j = i;j < N;j++) {
-			out << fasta[i] << "," << fasta[j] << inter->score_complete(fasta[i], fasta[j]) << endl;
+			out << fasta[i] << "," << fasta[j] << inter->score_complete(fasta[i], fasta[j], 0) << endl;
 		}
 	}
 	out.close();
