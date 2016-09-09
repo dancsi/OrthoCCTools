@@ -131,7 +131,7 @@ void Interaction::get_triplets(void) {
 	//cout << "Izvrsio sam se " << cnt << endl;
 }
 
-float Interaction::score_complete(string& p1, string& p2, int alignment)
+float Interaction::score_complete(const string& p1, const string& p2, int alignment)
 {
 	char seq[2 * len + 1]; 
 	memset(seq, '-', sizeof(seq)); seq[2 * len] = 0;

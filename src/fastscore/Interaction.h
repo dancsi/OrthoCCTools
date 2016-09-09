@@ -137,7 +137,7 @@ class Interaction {
 		void get_heptad(void);
 		void get_duplets(void);
 		void get_triplets(void);
-		float score_complete(string&,string&, int = 0);
+		float score_complete(const string&, const string&, int);
 		//float score_rfe();
 		//float score_fong_svm();
 };
