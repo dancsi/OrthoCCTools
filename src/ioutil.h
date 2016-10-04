@@ -108,8 +108,8 @@ void print_clique(const string out_name, const BitstringSet& clique, Graph<Bitst
 	printf("%s", ss.str().c_str());
 
 	FILE* fout = fopen(out_name.c_str(), overwrite? "w": "a");
-	fprintf(fout, "%s", ss.str().c_str());
 	if (!overwrite) fprintf(fout, "#######################\n");
+	fprintf(fout, "%s", ss.str().c_str());
 	fclose(fout);
 }
 

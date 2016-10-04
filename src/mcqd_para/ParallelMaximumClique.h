@@ -446,10 +446,10 @@ protected:
     unsigned int saveSolution(const VertexSet& c) {
         unsigned int ret;
         // make a copy of clique
-        TRACE("Saving solution", TRACE_MASK_CLIQUE, 1);
-        TRACEVAR(c.size(), TRACE_MASK_CLIQUE, 1);
         {
             std::lock_guard<std::mutex> lk(mutexQ); 
+            TRACE("Saving solution", TRACE_MASK_CLIQUE, 1);
+            TRACEVAR(c.size(), TRACE_MASK_CLIQUE, 1);
             if (maxSize < c.size()) {
                 maxSize = c.size();
                 maxClique = c;

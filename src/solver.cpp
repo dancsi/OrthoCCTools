@@ -65,11 +65,9 @@ bool will_interact_with_initial(pair<int, int> potential_pair)
 		});
 }
 
+int max_count = 0;
 struct ProgressReporter
 {
-	int max_count;
-	ProgressReporter() : max_count(0) {}
-
 	void operator()(const BitstringSet& clique) {
 		bool overwrite = false;
 		if (clique.size() > max_count)
