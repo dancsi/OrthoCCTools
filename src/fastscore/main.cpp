@@ -9,8 +9,12 @@
 #include <cstring>
 #include <fstream>
 #include <thread>
+#include <vector>
 #include <omp.h>
+#include <string>
 #include "Interaction.h"
+
+#include "options.h"
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -76,11 +80,35 @@ void* mmap_wrapper(const char* fname, size_t size)
 	return mmap(nullptr, size, PROT_WRITE, MAP_SHARED, fd, 0);
 }
 
+std::vector<std::string> split(std::string text, char sep) {
+    std::vector<std::string> tokens;
+    std::size_t start = 0, end = 0;
+    while ((end = text.find(sep, start)) != std::string::npos) {
+        if (end != start) {
+          tokens.push_back(text.substr(start, end - start));
+        }
+        start = end + 1;
+    }
+    if (end != start) {
+       tokens.push_back(text.substr(start));
+    }
+    return tokens;
+}
+
 int main(int argc, char **argv) {
 	auto start = get_clock();
-	if (argc > 1) {
+
+	if(argc>1)
+	{
 		fasta_name = string(argv[1]);
+		options::parse(argc-1, argv+1);
 	}
+	else
+	{
+		options::usage(argv);
+		exit(0);
+	}
+
 	N = 0;
 	int ret = read_fasta();
 	if (ret < 0) {
@@ -101,8 +129,16 @@ int main(int argc, char **argv) {
 		basename = fasta_name;
 	}
 
+	basename = options::get("out-name", basename);
 	out_name = basename + ".bin";
 	align_name = basename + ".align.bin";
+
+	auto align_str = split(options::get("align", std::string("0")), ',');
+	vector<int> alignments;
+	transform(align_str.begin(), align_str.end(), back_inserter(alignments), [](string s) { return stoi(s);});
+	cerr<<"Will test the following alignments: ";
+	for(int a:alignments) cerr<<a<<" ";
+	cerr<<endl;
 
 	size_t sz = (size_t)N*N*sizeof(float);
 
@@ -132,7 +168,7 @@ int main(int argc, char **argv) {
 
 		for (int q = p;q < N;q++)
 		{
-			const int alignments[] = {-14, -7, 0, 7, 14};
+			
 			float scores[5];
 			std::transform(begin(alignments), end(alignments), begin(scores),
 				[&p, &q](int align) {
