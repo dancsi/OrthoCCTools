@@ -86,3 +86,4 @@ $RECYCLE.BIN/
 data/*
 *.bz2
 output.txt
+*.bin

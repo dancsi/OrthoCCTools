@@ -35,6 +35,9 @@ struct triplet_list {
 		i = ii; j = jj; k = kk;
 		triad = tr;
 	}
+	friend ostream& operator<<(ostream& ost, const triplet_list& dl) {
+		return ost << dl.i << " " << dl.j << " " << dl.k << " " << dl.triad;
+	}
 };
 
 struct duplet_list {
@@ -44,6 +47,9 @@ struct duplet_list {
 	duplet_list(int i, int j, string str){
 		i1 = i; j1 = j;
 		dup = str;
+	}
+	friend ostream& operator<<(ostream& ost, const duplet_list& dl) {
+		return ost << dl.i1 << " " << dl.j1 << " " << dl.dup;
 	}
 };
 

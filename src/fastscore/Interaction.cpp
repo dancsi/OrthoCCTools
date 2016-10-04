@@ -68,8 +68,9 @@ void Interaction::get_duplets() {
 			}
 		}
 	}
-	//cout << len << endl;
-	//cout << cnt << endl;
+	
+	//cout << "Duplets\n";
+	//copy(duplets.begin(), duplets.end(), ostream_iterator<duplet_list>(cout, "\n"));
 }
 
 void Interaction::get_triplets(void) {
@@ -136,6 +137,7 @@ float Interaction::score_complete(const string& p1, const string& p2, int alignm
 	char seq[2 * len + 1]; 
 	memset(seq, '-', sizeof(seq)); seq[2 * len] = 0;
 
+	//PROBLEM. Bolje da ne secem pocetak i kraj.
 	memcpy(seq, p1.c_str(), p1.length());
 	if (alignment >= 0)
 	{
