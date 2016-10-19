@@ -20,7 +20,7 @@ float c1, c2;
 bool search_homodimers, search_heterodimers;
 
 string fname, initial_set_fname;
-string out_name;
+string out_name, fasta_name;
 
 int n_peptides = 0;
 float **score;
@@ -100,6 +100,10 @@ int main(int argc, char** argv)
 		search_homodimers = !options::get("hetero-only", false);
 		search_heterodimers = !options::get("homo-only", false);
 		out_name = options::get("out-name", string("output.txt"));
+
+		string default_fasta_name = basename(fname)+".fasta";
+		fasta_name = options::get("fasta-name", default_fasta_name);
+
 		if(!(search_homodimers || search_heterodimers))
 		{
 			fprintf(stderr, "You can not disable both homo- and heterodimer search\n");
@@ -108,7 +112,7 @@ int main(int argc, char** argv)
 		initial_set_fname = options::get("initial-set", string(""));
 	}
 
-	score = read_scores(fname);
+	score = read_scores(fname, fasta_name);
 	cerr<<n_peptides<<" peptides\n";
 
 	read_initial_set();

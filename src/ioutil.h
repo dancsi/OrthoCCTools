@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <fstream>
 
 #include <cstdio>
 #include <cstdlib>
@@ -45,17 +46,17 @@ bool parse_input(FILE* fin, char* id1, char* id2, float& score)
 	if (feof(fin) || !ret) return false;
 
 	int len = strlen(buf);
-	if (len<5) return false;
+	if (len < 5) return false;
 
 	int i = 0;
-	while (i <len &&buf[i] != ',')
+	while (i < len &&buf[i] != ',')
 	{
 		*id1++ = buf[i];
 		i++;
 	}
 	if (i == len) return false;
 	*id1 = 0; i++;
-	while (i<len && buf[i] != ',')
+	while (i < len && buf[i] != ',')
 	{
 		*id2++ = buf[i];
 		i++;
@@ -71,9 +72,9 @@ void dump_dimacs(std::vector<std::vector<char>>& conn, const char *fname)
 	FILE* fout = fopen(fname, "w");
 	int n = conn.size(), m = conn[0].size();
 	fprintf(fout, "p edge %d %d\n", n, m);
-	for (int i = 0;i<n;i++)
+	for (int i = 0;i < n;i++)
 	{
-		for (int j = 0;j<i;j++)
+		for (int j = 0;j < i;j++)
 		{
 			if (conn[i][j])
 				fprintf(fout, "e %d %d\n", i + 1, j + 1);
@@ -90,7 +91,7 @@ void print_clique(const string out_name, const BitstringSet& clique, Graph<Bitst
 
 	graph.remap(bs); //VERY IMPORTANT!!!
 
-	while (bs.size()>0)
+	while (bs.size() > 0)
 	{
 		int i = bs.nextSetBit();
 		bs.remove(i);
@@ -107,7 +108,7 @@ void print_clique(const string out_name, const BitstringSet& clique, Graph<Bitst
 
 	printf("%s", ss.str().c_str());
 
-	FILE* fout = fopen(out_name.c_str(), overwrite? "w": "a");
+	FILE* fout = fopen(out_name.c_str(), overwrite ? "w" : "a");
 	if (!overwrite) fprintf(fout, "#######################\n");
 	fprintf(fout, "%s", ss.str().c_str());
 	fclose(fout);
@@ -147,7 +148,7 @@ float** allocate_matrix_pointers(float* data, int n)
 	return mat;
 }
 
-float **read_scores_binary(std::string score_file)
+float **read_scores_binary(std::string score_file, std::string fasta_name)
 {
 	int fd = open(score_file.c_str(), O_RDONLY, 0600);
 
@@ -181,12 +182,17 @@ float **read_scores_binary(std::string score_file)
 		exit(EXIT_FAILURE);
 	}
 	size_t n_peptides = (size_t)sqrt(fileInfo.st_size / 4);
-	char buf[20];
+
+	std::ifstream fasta_file(fasta_name);
 	for (int i = 0;i < n_peptides;i++)
 	{
-		sprintf(buf, "P%d", i+1);
-		get_id(buf);
+		std::string line;
+		do {
+			std::getline(fasta_file, line);
+		} while (line[0] != '>');
+		get_id(line.c_str()+1);
 	}
+	fasta_file.close();
 	return allocate_matrix_pointers(score_storage, n_peptides);
 }
 
@@ -211,14 +217,19 @@ float **read_scores_plaintext(std::string score_file)
 	return score;
 }
 
-float **read_scores(std::string score_file)
+float **read_scores(std::string score_file, std::string fasta_name)
 {
 	if (score_file.find(".bin") != std::string::npos)
 	{
-		return read_scores_binary(score_file);
+		return read_scores_binary(score_file, fasta_name);
 	}
 	else
 	{
 		return read_scores_plaintext(score_file);
 	}
+}
+
+std::string basename(std::string path) {
+	auto pos = path.find_last_of('.');
+	return path.substr(0, pos);
 }
