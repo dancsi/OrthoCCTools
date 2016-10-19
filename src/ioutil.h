@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -184,6 +185,7 @@ float **read_scores_binary(std::string score_file, std::string fasta_name)
 	size_t n_peptides = (size_t)sqrt(fileInfo.st_size / 4);
 
 	std::ifstream fasta_file(fasta_name);
+	assert(fasta_file.good());
 	for (int i = 0;i < n_peptides;i++)
 	{
 		std::string line;
