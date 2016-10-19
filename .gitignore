@@ -83,7 +83,17 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+#LaTeX files
+*.aux
+*.log
+*.nav
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+
 data/*
 *.bz2
-output.txt
 *.bin
+output.txt
+output.txt.current
