@@ -204,8 +204,9 @@ public:
                 if (job.estimatedMax < localMaxSize || parent->killTimer.timedOut) {return;}
                 Job newJob;
                 auto v = topVertex(job.numbers, job.vertices);
+				auto topNum = topNumber(job.numbers);
                 popTop(job.numbers, job.vertices);
-                job.estimatedMax = job.c.size() + topNumber(job.numbers);
+                job.estimatedMax = job.c.size() + topNum;
                 graph->intersectWithNeighbours(v, job.vertices, newJob.vertices);
                 
                 newJob.c = job.c;
