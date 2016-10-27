@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 	inter = new Interaction();
 	inter->init_complete_score();
 
-	string out_name, align_name, basename;
+	string out_name, align_name, basename, orientation_name;
 
 	if (fasta_name.length() >= 5 && 0 == fasta_name.compare(fasta_name.length() - 6, 6, ".fasta"))
 	{
@@ -129,9 +129,12 @@ int main(int argc, char **argv) {
 		basename = fasta_name;
 	}
 
+	bool check_antiparallel = options::get("antiparallel", false);
+
 	basename = options::get("out-name", basename);
 	out_name = basename + ".bin";
 	align_name = basename + ".align.bin";
+	orientation_name = basename + ".orientation.bin";
 
 	auto align_str = split(options::get("align", std::string("0")), ',');
 	vector<int> alignments;
@@ -144,6 +147,11 @@ int main(int argc, char **argv) {
 
 	float *score = (float*)mmap_wrapper(out_name.c_str(), sz);
 	int8_t *align = (int8_t*)mmap_wrapper(align_name.c_str(), N*N);
+
+	uint8_t *antiparallel = nullptr;
+	if (check_antiparallel) {
+		antiparallel = (uint8_t*)mmap_wrapper(orientation_name.c_str(), N*N);
+	}
 
 	if(score == MAP_FAILED)
 	{
@@ -169,19 +177,34 @@ int main(int argc, char **argv) {
 		for (int q = p;q < N;q++)
 		{
 			
-			float scores[5];
-			std::transform(begin(alignments), end(alignments), begin(scores),
-				[&p, &q](int align) {
-				return inter->score_complete(fasta[p], fasta[q], align);
-			});
-			int min_index = std::distance( begin(scores), std::min_element(begin(scores), end(scores)) );
-			float scr = scores[min_index];
-			int8_t alignment = alignments[min_index];
+			pair<float, int> score_parallel = inter->score_alignments(fasta[p], fasta[q], alignments);
+			float scr = score_parallel.first;
+			int8_t alignment = score_parallel.second;
 
-			score[N*p + q] = scr;
-			score[N*q + p] = scr;
-			align[N*p + q] = alignment;
-			align[N*q + p] = alignment;
+			bool antiparallel_is_best = false;
+			if (check_antiparallel) {
+				string reversed(fasta[q].length(), '\0');
+				reverse_copy(fasta[q].begin(), fasta[q].end(), reversed.begin());
+				pair<float, int> score_antiparallel = inter->score_alignments(fasta[p], reversed, alignments);
+
+				if (score_antiparallel.first < scr) {
+					scr = score_antiparallel.first;
+					alignment = score_antiparallel.second;
+					antiparallel_is_best = true;
+				}
+			}
+
+			size_t idx_pq = N*p + q;
+			size_t idx_qp = N*q + p;
+
+			score[idx_pq] = scr;
+			score[idx_qp] = scr;
+			align[idx_pq] = alignment;
+			align[idx_qp] = alignment;
+			if (check_antiparallel) {
+				antiparallel[idx_pq] = antiparallel_is_best;
+				antiparallel[idx_qp] = antiparallel_is_best;
+			}
 		}
 #pragma omp atomic
 			done++;
@@ -189,6 +212,9 @@ int main(int argc, char **argv) {
 
 	munmap(score, sz);
 	munmap(align, N*N);
+	if (check_antiparallel) {
+		munmap(antiparallel, N*N);
+	}
 
 	auto stop = get_clock();
 	printf("%.2fs elapsed\n", time_diff(start, stop));

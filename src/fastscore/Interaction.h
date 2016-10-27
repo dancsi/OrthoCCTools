@@ -21,17 +21,17 @@ struct rNCR {
 	char c1;
 	char hhaa;
 	int i;
-	rNCR(){}
-	rNCR(int a, char b, char c, int i1){
+	rNCR() {}
+	rNCR(int a, char b, char c, int i1) {
 		ii = a; c1 = b; hhaa = c; i = i1;
 	}
 };
 
 struct triplet_list {
-	int i,j,k;
+	int i, j, k;
 	string triad;
-	triplet_list(){}
-	triplet_list(int ii, int jj, int kk, string tr){
+	triplet_list() {}
+	triplet_list(int ii, int jj, int kk, string tr) {
 		i = ii; j = jj; k = kk;
 		triad = tr;
 	}
@@ -41,10 +41,10 @@ struct triplet_list {
 };
 
 struct duplet_list {
-	int i1,j1;
+	int i1, j1;
 	string dup;
-	duplet_list(){}
-	duplet_list(int i, int j, string str){
+	duplet_list() {}
+	duplet_list(int i, int j, string str) {
 		i1 = i; j1 = j;
 		dup = str;
 	}
@@ -83,7 +83,7 @@ struct first_level_hash
 		case 'A':
 			return 4;
 		case 'D':
-			return a[2]?6:5;
+			return a[2] ? 6 : 5;
 		case 'E':
 			return a[2] ? (a[2] == 'A' ? 8 : 9) : 7;
 		case 'G':
@@ -95,7 +95,7 @@ struct first_level_hash
 		switch (a[1])
 		{
 		case 'A':
-			return a[2] ? (a[2]=='D'?14:15) : 13;
+			return a[2] ? (a[2] == 'D' ? 14 : 15) : 13;
 		case 'D':
 			return 16;
 		case 'E':
@@ -109,7 +109,7 @@ struct second_level_hash
 {
 	size_t operator()(const string& s)
 	{
-		const int m[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 11, 0, 12, 13, 14, 15, 16, 0, 17, 18, 0, 19};
+		const int m[] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 0, 8, 9, 10, 11, 0, 12, 13, 14, 15, 16, 0, 17, 18, 0, 19 };
 		const int N = 20;
 		const char* a = s.c_str();
 		const int b[3] = { a[0] - 'A', a[1] - 'A', a[2] - 'A' };
@@ -125,27 +125,26 @@ struct second_level_hash
 };
 
 class Interaction {
-	private:
-		static const char hpos='f'; //kaze covjek da ne mijenjam
-		static const int len = 100;
+private:
+	static const char hpos = 'f'; //kaze covjek da ne mijenjam
+	static const int len = 100;
 
-	public:
-		Interaction(){
-			memset(hi,0,sizeof(hi));
-		}
-		//void heptad_array();
-		int hi[205];
-		vector<char>ha;
-		vector<triplet_list> triplets;
-		vector<duplet_list>duplets;
-		fast_map< fast_map<float, 20 * 20 * 20 + 20 * 20, second_level_hash>, 18, first_level_hash > weights;
-		void init_complete_score(void);
-		void get_heptad(void);
-		void get_duplets(void);
-		void get_triplets(void);
-		float score_complete(const string&, const string&, int);
-		//float score_rfe();
-		//float score_fong_svm();
+public:
+	Interaction() {
+		memset(hi, 0, sizeof(hi));
+	}
+	//void heptad_array();
+	int hi[205];
+	vector<char>ha;
+	vector<triplet_list> triplets;
+	vector<duplet_list>duplets;
+	fast_map< fast_map<float, 20 * 20 * 20 + 20 * 20, second_level_hash>, 18, first_level_hash > weights;
+	void init_complete_score(void);
+	void get_heptad(void);
+	void get_duplets(void);
+	void get_triplets(void);
+	float score_complete(const string&, const string&, int);
+	pair<float /*score*/, int /*alignment*/> score_alignments(const string& p, const string& q, const vector<int>& alignments);
 };
 
 #endif

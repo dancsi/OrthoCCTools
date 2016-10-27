@@ -231,3 +231,13 @@ void Interaction::init_complete_score(void) {
 	this->get_duplets();
 	this->get_triplets();
 }
+
+pair<float /*score*/, int /*alignment*/> Interaction::score_alignments(const string& p, const string& q, const vector<int>& alignments) {
+	float scores[5];
+	std::transform(begin(alignments), end(alignments), begin(scores),
+		[&p, &q, this](int align) {
+		return score_complete(p, q, align);
+	});
+	int min_index = std::distance(begin(scores), std::min_element(begin(scores), end(scores)));
+	return{ scores[min_index], alignments[min_index] };
+}
