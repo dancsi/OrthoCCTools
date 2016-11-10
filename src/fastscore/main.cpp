@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <limits>
 #include <thread>
 #include <vector>
 #include <omp.h>
@@ -81,27 +82,27 @@ void* mmap_wrapper(const char* fname, size_t size)
 }
 
 std::vector<std::string> split(std::string text, char sep) {
-    std::vector<std::string> tokens;
-    std::size_t start = 0, end = 0;
-    while ((end = text.find(sep, start)) != std::string::npos) {
-        if (end != start) {
-          tokens.push_back(text.substr(start, end - start));
-        }
-        start = end + 1;
-    }
-    if (end != start) {
-       tokens.push_back(text.substr(start));
-    }
-    return tokens;
+	std::vector<std::string> tokens;
+	std::size_t start = 0, end = 0;
+	while ((end = text.find(sep, start)) != std::string::npos) {
+		if (end != start) {
+			tokens.push_back(text.substr(start, end - start));
+		}
+		start = end + 1;
+	}
+	if (end != start) {
+		tokens.push_back(text.substr(start));
+	}
+	return tokens;
 }
 
 int main(int argc, char **argv) {
 	auto start = get_clock();
 
-	if(argc>1)
+	if (argc > 1)
 	{
 		fasta_name = string(argv[1]);
-		options::parse(argc-1, argv+1);
+		options::parse(argc - 1, argv + 1);
 	}
 	else
 	{
@@ -129,7 +130,24 @@ int main(int argc, char **argv) {
 		basename = fasta_name;
 	}
 
-	bool check_antiparallel = options::get("antiparallel", false);
+	char orientation = options::get("orientation", 'B');
+	bool check_parallel, check_antiparallel;
+	switch (orientation) {
+	case 'B':
+		check_parallel = check_antiparallel = true; 
+		break;
+	case 'P':
+		check_parallel = true;
+		check_antiparallel = false;
+		break;
+	case 'A':
+		check_parallel = false;
+		check_antiparallel = true;
+		break;
+	default:
+		cerr << "Unrecognized option " << orientation << " for orientation. It must be P, A, or B" << endl;
+		return 0;
+	}
 
 	basename = options::get("out-name", basename);
 	out_name = basename + ".bin";
@@ -138,22 +156,19 @@ int main(int argc, char **argv) {
 
 	auto align_str = split(options::get("align", std::string("0")), ',');
 	vector<int> alignments;
-	transform(align_str.begin(), align_str.end(), back_inserter(alignments), [](string s) { return stoi(s);});
-	cerr<<"Will test the following alignments: ";
-	for(int a:alignments) cerr<<a<<" ";
-	cerr<<endl;
+	transform(align_str.begin(), align_str.end(), back_inserter(alignments), [](string s) { return stoi(s); });
+	cerr << "Will test the following alignments: ";
+	for (int a : alignments) cerr << a << " ";
+	cerr << endl;
 
-	size_t sz = (size_t)N*N*sizeof(float);
+	size_t sz = (size_t)N*N * sizeof(float);
 
 	float *score = (float*)mmap_wrapper(out_name.c_str(), sz);
 	int8_t *align = (int8_t*)mmap_wrapper(align_name.c_str(), N*N);
 
-	uint8_t *antiparallel = nullptr;
-	if (check_antiparallel) {
-		antiparallel = (uint8_t*)mmap_wrapper(orientation_name.c_str(), N*N);
-	}
+	uint8_t *antiparallel = (uint8_t*)mmap_wrapper(orientation_name.c_str(), N*N);
 
-	if(score == MAP_FAILED)
+	if (score == MAP_FAILED)
 	{
 		printf("ERROR mmap()-ing file:%s\n", strerror(errno));
 		exit(1);
@@ -163,9 +178,9 @@ int main(int argc, char **argv) {
 	size_t done = 0, prev = 0;
 	auto prev_clock = get_clock();
 #pragma omp parallel for  schedule(dynamic, 10)
-	for (int p = 0;p < N;p++)
+	for (int p = 0; p < N; p++)
 	{
-		if(omp_get_thread_num() == 0)
+		if (omp_get_thread_num() == 0)
 		{
 			elapsed = time_diff(prev_clock, get_clock());
 			speed = (done - prev) / elapsed;
@@ -174,18 +189,25 @@ int main(int argc, char **argv) {
 			prev_clock = get_clock();
 		}
 
-		for (int q = p;q < N;q++)
+		for (int q = p; q < N; q++)
 		{
-			
-			pair<float, int> score_parallel = inter->score_alignments(fasta[p], fasta[q], alignments);
-			float scr = score_parallel.first;
-			int8_t alignment = score_parallel.second;
+			pair<float, int> score_parallel = make_pair(numeric_limits<float>::infinity(), 0);
+			pair<float, int> score_antiparallel = make_pair(numeric_limits<float>::infinity(), 0); 
 
+			float scr = numeric_limits<float>::infinity();
+			int alignment = 0;
 			bool antiparallel_is_best = false;
+
+			if (check_parallel) {
+				score_parallel = inter->score_alignments(fasta[p], fasta[q], alignments);
+				scr = score_parallel.first;
+				alignment = score_parallel.second;
+			}
+
 			if (check_antiparallel) {
 				string reversed(fasta[q].length(), '\0');
 				reverse_copy(fasta[q].begin(), fasta[q].end(), reversed.begin());
-				pair<float, int> score_antiparallel = inter->score_alignments(fasta[p], reversed, alignments);
+				score_antiparallel = inter->score_alignments(fasta[p], reversed, alignments);
 
 				if (score_antiparallel.first < scr) {
 					scr = score_antiparallel.first;
@@ -207,14 +229,12 @@ int main(int argc, char **argv) {
 			}
 		}
 #pragma omp atomic
-			done++;
+		done++;
 	}
 
 	munmap(score, sz);
 	munmap(align, N*N);
-	if (check_antiparallel) {
-		munmap(antiparallel, N*N);
-	}
+	munmap(antiparallel, N*N);
 
 	auto stop = get_clock();
 	printf("%.2fs elapsed\n", time_diff(start, stop));
@@ -261,7 +281,7 @@ void calc(int from, int to, int idx) {
 	q += missed;
 	p += q / N;
 
-	for (int i = from;i < to;i++) {
+	for (int i = from; i < to; i++) {
 		if (i == (p + 1)*N - p*(p + 1) / 2) {
 			p++; q = p;
 		}
@@ -274,8 +294,8 @@ void calc(int from, int to, int idx) {
 void check() {
 	ofstream out("complete.out");
 	if (!out) return;
-	for (int i = 0;i < N;i++) {
-		for (int j = i;j < N;j++) {
+	for (int i = 0; i < N; i++) {
+		for (int j = i; j < N; j++) {
 			out << fasta[i] << "," << fasta[j] << inter->score_complete(fasta[i], fasta[j], 0) << endl;
 		}
 	}

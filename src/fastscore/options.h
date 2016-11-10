@@ -17,9 +17,9 @@ using namespace std;
 namespace options {
 
 	option long_options[] = {
-			{"out-name", required_argument, nullptr, 0},
-			{"align", required_argument,    nullptr, 0},
-			{"antiparallel", no_argument,   nullptr, 0}
+			{"out-name",    required_argument, nullptr, 0},
+			{"align",       required_argument, nullptr, 0},
+			{"orientation", required_argument, nullptr, 0},
 	};
 	map <string, string> opt_map;
 
