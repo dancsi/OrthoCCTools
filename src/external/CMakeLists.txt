@@ -1,0 +1,5 @@
+add_subdirectory(flags)
+add_subdirectory(gsl)
+add_subdirectory(json)
+add_subdirectory(MemoryMapped)
+add_subdirectory(spdlog)

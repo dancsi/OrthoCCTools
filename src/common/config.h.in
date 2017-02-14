@@ -1,0 +1,10 @@
+#cmakedefine HAVE_optional
+#cmakedefine HAVE_EXPERIMENTAL_optional
+
+#cmakedefine HAVE_string_view
+#cmakedefine HAVE_EXPERIMENTAL_string_view
+
+#cmakedefine HAVE_filesystem
+#cmakedefine HAVE_EXPERIMENTAL_filesystem
+
+#cmakedefine HAVE_EXPERIMENTAL_array
