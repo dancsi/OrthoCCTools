@@ -53,7 +53,7 @@ struct ScoringEngine {
 	template<int len>
 	int residues_hash(std::string_view residues);
 
-	template<int len>
+	template<size_t len>
 	void insert_weight(
 		std::string_view registers,
 		std::string_view residues,
@@ -103,22 +103,6 @@ struct ScoringEngine {
 	void init_pairs();
 	void init_triples();
 
-	template<int k>
-	struct pow20 : std::integral_constant<int, 20 * pow20<k-1>::value > {};
-
-	template<>
-	struct pow20<0> : std::integral_constant<int, 1> {};
-
-
-	template<int k>
-	std::vector<std::array<float, pow20<k>::value>>& get_weight_array_vector() {}
-
-	template<>
-	std::vector<std::array<float, pow20<2>::value>>& get_weight_array_vector<2>() { return pair_weights; }
-
-	template<>
-	std::vector<std::array<float, pow20<3>::value>>& get_weight_array_vector<3>() { return triple_weights; }
-
-	template<int k>
-	float generic_score(std::string_view chain1, std::string_view chain2, std::vector<ResidueTuple<k>>& tuples);
+	template<int k, typename weights_type>
+	float generic_score(std::string_view chain1, std::string_view chain2, std::vector<ResidueTuple<k>>& tuples, weights_type& weight_vec);
 };

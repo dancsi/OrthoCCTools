@@ -21,9 +21,11 @@ IF (WIN32 OR WIN64)
 ENDIF (WIN32 OR WIN64)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -O3 -fopenmp")
+    set(EXTERNAL_LIBRARIES "stdc++fs")
 elseif(MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /openmp")
 endif()
+
 
 ADD_SUBDIRECTORY(src)

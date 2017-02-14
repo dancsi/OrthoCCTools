@@ -20,7 +20,7 @@ ScoringEngine::ScoringEngine(string_view weights_path, int max_peptide_length) :
 	pair_weights.reserve(2486);
 	triple_weights.reserve(14093);
 
-	std::ifstream fin(path);
+	std::ifstream fin(path.string());
 	std::string registers, residues;
 	float value;
 	while (fin >> registers >> residues >> value) {
@@ -37,10 +37,9 @@ ScoringEngine::ScoringEngine(string_view weights_path, int max_peptide_length) :
 	init_triples();
 }
 
-template<int k>
-float ScoringEngine::generic_score(string_view chain1, string_view chain2, std::vector<ResidueTuple<k>>& tuples) {
+template<int k, typename weights_type>
+float ScoringEngine::generic_score(string_view chain1, string_view chain2, std::vector<ResidueTuple<k>>& tuples, weights_type& weight_vec) {
 	string_view chains[] = { chain1, chain2 };
-	auto& weight_vec = get_weight_array_vector<k>();
 
 	float res = 0;
 
@@ -69,7 +68,7 @@ float ScoringEngine::generic_score(string_view chain1, string_view chain2, std::
 float ScoringEngine::score(string_view chain1, string_view chain2)
 {
 	const float w0 = -4.54197f;
-	return w0 + generic_score(chain1, chain2, pairs) + generic_score(chain1, chain2, triples);
+	return w0 + generic_score(chain1, chain2, pairs, pair_weights) + generic_score(chain1, chain2, triples, triple_weights);
 }
 
 ScoringEngine::aligned_score_t ScoringEngine::score(string_view chain1, string_view chain2, alignment_t max_heptad_displacement)

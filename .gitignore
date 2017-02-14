@@ -30,4 +30,5 @@
 
 # Folders
 build/
+build64/
 /src/common/config.h

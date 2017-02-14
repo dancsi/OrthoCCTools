@@ -179,7 +179,7 @@ bool MemoryMapped::remap(uint64_t offset, size_t mappedBytes)
 /// get OS page size (for remap)
 int MemoryMapped::getpagesize()
 {
-#ifdef _MSC_VER
+#ifdef _WIN32
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
 	return sysInfo.dwAllocationGranularity;
