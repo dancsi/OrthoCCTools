@@ -69,12 +69,6 @@ int main(int argc, char **argv) {
 	auto stop = chrono::high_resolution_clock::now();
 	chrono::duration<double> duration = stop - start;
 	cout << duration.count() << endl;
-	
-	for (int i = 0; i < n; i++) {
-		for (int j = i; j < n; j++) {
-			cout << ps[i].id << "," << ps[j].id << "," << im[i][j] << endl;
-		}
-	}
 
 	return 0;
 }

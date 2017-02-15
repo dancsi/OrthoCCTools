@@ -149,13 +149,13 @@ int ScoringEngine::residues_hash(std::string_view residues)
 template<>
 int ScoringEngine::residues_hash<2>(std::string_view residues)
 {
-	return 20 * residues[0] + residues[1];
+	return 20 * residue_code(residues[0]) + residue_code(residues[1]);
 }
 
 template<>
 int ScoringEngine::residues_hash<3>(std::string_view residues)
 {
-	return 400 * residues[0] + 20 * residues[1] + residues[2];
+	return 400 * residue_code(residues[0]) + 20 * residue_code(residues[1]) + residue_code(residues[2]);
 }
 
 //we will use this to sort the generated pairs and triples on the maximum position in any chain
