@@ -34,6 +34,7 @@ namespace std {
 #error "This program needs <filesystem>"
 #endif
 
+#include <array>
 #ifdef HAVE_EXPERIMENTAL_array
 #include <experimental/array>
 namespace std {

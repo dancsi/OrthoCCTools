@@ -1,17 +1,28 @@
 #pragma once
 
-#include "ScoringEngine.h"
+#include <map>
+#include <vector>
 
-struct ScoringEnginePotapov : public ScoringEngine {
+#include "common/experimental_cxx_features.h"
+
+#include "ScoringHelper.h"
+
+struct ScoringEnginePotapov {
 	using string_view = std::string_view;
 
+public:
 	const int max_peptide_length;
-	ScoringEnginePotapov(std::string_view weights_path = "scores.dat", int max_peptide_length = 100);
+
+	ScoringEnginePotapov(string_view weights_path = "scores.dat", int max_peptide_length = 100);
+
+	float score(string_view chain1, string_view chain2);
+
+private:
 
 	template<size_t k>
 	void insert_weight(
-		std::string_view registers,
-		std::string_view residues,
+		string_view registers,
+		string_view residues,
 		float weight,
 		std::vector<std::array<float, detail::pow<size_t, 20, k>::value>>& weights,
 		std::map<std::string, int>& rmap)
@@ -20,7 +31,7 @@ struct ScoringEnginePotapov : public ScoringEngine {
 		if (idx >= weights.size()) {
 			weights.resize(idx + 1);
 		}
-		auto h = residues_hash<k>(residues);
+		auto h = detail::residues_hash<k>(residues);
 		weights[idx][h] = weight;
 	}
 
@@ -58,10 +69,8 @@ struct ScoringEnginePotapov : public ScoringEngine {
 	void init_pairs();
 	void init_triples();
 
-	float score(string_view chain1, string_view chain2);
-
 	template<int k, typename weights_type>
-	float generic_score(std::string_view chain1, std::string_view chain2, std::vector<ResidueTuple<k>>& tuples, weights_type& weight_vec);
+	float generic_score(string_view chain1, string_view chain2, std::vector<ResidueTuple<k>>& tuples, weights_type& weight_vec);
 
 	std::vector<std::array<float, 20 * 20>> pair_weights;
 	std::map<std::string, int> pair_register_map;
@@ -69,5 +78,5 @@ struct ScoringEnginePotapov : public ScoringEngine {
 	std::vector<std::array<float, 20 * 20 * 20>> triple_weights;
 	std::map<std::string, int> triple_register_map;
 
-	int register_idx(std::string_view registers, std::map<std::string, int>& rmap);
+	int register_idx(string_view registers, std::map<std::string, int>& rmap);
 };

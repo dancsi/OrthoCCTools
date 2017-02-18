@@ -68,7 +68,7 @@ float ScoringEnginePotapov::generic_score(string_view chain1, string_view chain2
 			buf[i] = chains[chain_id][pos];
 		}
 
-		res += weight_array[residues_hash<k>({ buf, k })];
+		res += weight_array[detail::residues_hash<k>({ buf, k })];
 	skip: continue;
 	}
 
@@ -88,7 +88,7 @@ int ScoringEnginePotapov::register_idx(std::string_view registers, std::map<std:
 		return it->second;
 	}
 
-	int next_idx = rmap.size();
+	int next_idx = static_cast<int>(rmap.size());
 	rmap.insert({ (std::string)registers, next_idx });
 
 	return next_idx;

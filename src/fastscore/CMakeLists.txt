@@ -1,12 +1,11 @@
 set(FASTSCORE_SOURCES 
 	${CMAKE_CURRENT_SOURCE_DIR}/fastscore.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/ScoringEngine.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ScoringEnginePotapov.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ScoringEngineBCIPA.cpp
 )
 
 set(FASTSCORE_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/ScoringEngine.h
+	${CMAKE_CURRENT_SOURCE_DIR}/ScoringHelper.h
 	${CMAKE_CURRENT_SOURCE_DIR}/ScoringEnginePotapov.h
 	${CMAKE_CURRENT_SOURCE_DIR}/ScoringEngineBCIPA.h
 )
