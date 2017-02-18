@@ -6,7 +6,7 @@ set(COMMON_SOURCES
 set(COMMON_HEADERS 
 	${CMAKE_CURRENT_SOURCE_DIR}/experimental_cxx_features.h
 	${CMAKE_CURRENT_SOURCE_DIR}/logging.h
-	${CMAKE_CURRENT_SOURCE_DIR}/InteractionMatrix.h
+	${CMAKE_CURRENT_SOURCE_DIR}/SpecialMatrices.h
 	${CMAKE_CURRENT_SOURCE_DIR}/MemoryMappedMatrix.h
 	${CMAKE_CURRENT_SOURCE_DIR}/PeptideSet.h
 )

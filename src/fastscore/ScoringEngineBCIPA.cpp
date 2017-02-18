@@ -1,5 +1,7 @@
 #include "ScoringEngineBCIPA.h"
 
+#include <cctype>
+
 ScoringEngineBCIPA::ScoringEngineBCIPA() {
 	init_c_weights();
 	init_es_weights();
@@ -49,7 +51,7 @@ float ScoringEngineBCIPA::score(string_view chain1, string_view chain2) /*
 	{
 		int reg = i % 7;  //register index (0 = f)
 
-		if (chain1[i] == '-' || chain2[i] == '-') continue;
+		if (!isupper(chain1[i]) || !isupper(chain2[i])) continue;
 
 		/* helical propensity contribution */
 		if ((hp_score(chain1[i])) != 0 && (hp_score(chain2[i]) != 0))  //only count paired residues ('-':'X' pairs contribute nothing)
@@ -82,6 +84,7 @@ float ScoringEngineBCIPA::score(string_view chain1, string_view chain2) /*
 }
 
 float ScoringEngineBCIPA::hp_score(const char c) {
+	if (!isupper(c)) return 0;
 	const float scores[] = { 1.41f, 0.66f, 0.99f, 1.59f, 1.16f, 0.43f, 1.05f, 1.09f, 1.23f, 1.34f, 1.30f, 0.76f, 0.34f, 1.27f, 1.21f, 0.57f, 0.76f, 0.98f, 1.02f, 0.74f };
 	return scores[detail::residue_code(c)];
 }
