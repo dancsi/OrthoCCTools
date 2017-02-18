@@ -29,7 +29,9 @@
 *.app
 
 # Folders
+.vs/
 build/
 build64/
 /src/common/config.h
 /reference
+/data

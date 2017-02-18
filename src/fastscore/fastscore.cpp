@@ -6,7 +6,8 @@
 
 #include "flags.h"
 
-#include "ScoringEngine.h"
+#include "ScoringEnginePotapov.h"
+#include "ScoringEngineBCIPA.h"
 #include "common/PeptideSet.h"
 #include "common/InteractionMatrix.h"
 
@@ -22,6 +23,19 @@ Available options:
     --orientation={parallel, antiparallel, both}
 )");
 	exit(1);
+}
+
+template<typename ScoringEngineType>
+void score_pairs(PeptideSet& ps, ScoringEngineType& sc, int max_heptad_displacement, ScoringEngine::Orientation orientation, InteractionMatrix& im) {
+	auto n = ps.size();
+
+#pragma omp parallel for
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			auto score = sc.ScoringEngine::score(ps[i].sequence, ps[j].sequence, max_heptad_displacement, orientation);
+			im[i][j] = score.score;
+		}
+	}
 }
 
 int main(int argc, char **argv) {
@@ -51,22 +65,16 @@ int main(int argc, char **argv) {
 		print_usage_and_exit();
 	}
 
-	ScoringEngine sc;
+	ScoringEnginePotapov sc; 
 
 	PeptideSet ps(fasta_path.string());
-	auto n = ps.size();
 	
 	InteractionMatrix im{ basename + ".bin", ps.size() };
 
 	auto start = chrono::high_resolution_clock::now();
-	//#pragma omp parallel for
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			auto score = sc.score(ps[i].sequence, ps[j].sequence, max_heptad_displacement, orientation);
-			im[i][j] = score.score;
-		}
-	}
+	score_pairs(ps, sc, max_heptad_displacement, orientation, im);
 	auto stop = chrono::high_resolution_clock::now();
+
 	chrono::duration<double> duration = stop - start;
 	cout << duration.count() << endl;
 
