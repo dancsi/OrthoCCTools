@@ -10,7 +10,7 @@
 #include "ScoringEnginePotapov.h"
 #include "ScoringEngineBCIPA.h"
 #include "common/PeptideSet.h"
-#include "common/InteractionMatrix.h"
+#include "common/SpecialMatrices.h"
 
 using namespace std;
 namespace fs = std::experimental::filesystem;
