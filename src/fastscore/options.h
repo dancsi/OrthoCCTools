@@ -3,7 +3,11 @@
 #include "flags.h"
 #include "ScoringHelper.h"
 
+#include <algorithm>
+#include <iostream>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace fs = std::experimental::filesystem;
 
@@ -15,31 +19,32 @@ struct Options {
 USAGE: fastscore INPUT [OPTIONS...]
 Available options:
     --basename=PATH                 specify output base name
-    --max-heptad-displacement=NUM   try shifting the peptides left and right by this many heptads
-	--alignment=-7*N,-7*(N-1),...,-7,0,7,...,7*(N-1),7*N
+    --max-heptad-displacement=NUM   try shifting the peptides left and right by up to this many heptads
+    --alignment=LIST                try these alignments
     --orientation={parallel, antiparallel, both}
-	--score-func={potapov, bcipa}   choose scoring function
+    --score-func={potapov, bcipa}   choose scoring function
 )");
 		exit(1);
 	}
 
 	fs::path fasta_path;
 	std::string basename;
-	int max_heptad_displacement;
+	std::vector<ScoringOptions::alignment_t> alignment;
 	ScoringOptions::Orientation orientation;
 	ScoringOptions::ScoreFunc score_func;
 
-	int parse_alignment(const std::string& alignment) {
-		std::istringstream ss(alignment);
+	void parse_alignment(const std::string& alignment_str) {
+		std::istringstream ss(alignment_str);
 		std::string token;
+		std::set<ScoringOptions::alignment_t> unique_alignments;
 
 		int res = 0;
 		while (std::getline(ss, token, ',')) {
 			int num = std::stoi(token);
-			res = std::max(res, abs(num) / 7);
+			unique_alignments.insert(static_cast<ScoringOptions::alignment_t>(abs(num)));
 		}
 
-		return res;
+		std::copy(unique_alignments.begin(), unique_alignments.end(), std::back_inserter(alignment));
 	}
 
 	Options(int argc, char** argv) : args(argc, argv) {
@@ -51,10 +56,19 @@ Available options:
 
 		basename = args.get<string>("basename", (fasta_path.parent_path() / fasta_path.stem()).string());
 
-		max_heptad_displacement = args.get<int>("max-heptad-displacement", 0);
-		auto alignment = args.get<string>("alignment");
-		if (alignment) {
-			max_heptad_displacement = parse_alignment(alignment.value());
+		int max_heptad_displacement = args.get<int>("max-heptad-displacement", 0);
+		auto alignment_str = args.get<string>("alignment");
+		if (alignment_str) {
+			if (max_heptad_displacement != 0) {
+				std::cout << "alignment and max_heptad_displacement can not be specified at the same time\n";
+				exit(1);
+			}
+			parse_alignment(alignment_str.value());
+		}
+		else {
+			for (int i = 0; i <= max_heptad_displacement; i++) {
+				alignment.push_back(+7 * i);
+			}
 		}
 
 		string orientation_str = args.get<string>("orientation", "parallel");

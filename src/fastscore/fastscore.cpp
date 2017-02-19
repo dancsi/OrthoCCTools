@@ -15,11 +15,12 @@
 using namespace std;
 namespace fs = std::experimental::filesystem;
 
+using ScoringOptions::alignment_t;
 using OrientationMatrix = SquareMatrix<ScoringOptions::Orientation>;
-using AlignmentMatrix = SquareMatrix<ScoringOptions::alignment_t>;
+using AlignmentMatrix = SquareMatrix<alignment_t>;
 
 template<typename ScoringEngineType>
-void score_pairs(PeptideSet& ps, ScoringEngineType& sc, int max_heptad_displacement, ScoringOptions::Orientation orientation, InteractionMatrix& im, OrientationMatrix& om, AlignmentMatrix& am) {
+void score_pairs(PeptideSet& ps, ScoringEngineType& sc, std::vector<alignment_t>& alignment, ScoringOptions::Orientation orientation, InteractionMatrix& im, OrientationMatrix& om, AlignmentMatrix& am) {
 	auto n = ps.size();
 	int items_to_process = n*(n + 1) / 2;
 	int items_processed_total = 0, items_processed_prev = 0;
@@ -30,7 +31,7 @@ void score_pairs(PeptideSet& ps, ScoringEngineType& sc, int max_heptad_displacem
 #pragma omp parallel for
 	for (int i = 0; i < n; i++) {
 		for (int j = i; j < n; j++) {
-			auto score = sc.score(ps[i].sequence, ps[j].sequence, max_heptad_displacement, orientation);
+			auto score = sc.score(ps[i].sequence, ps[j].sequence, alignment, orientation);
 			im[i][j] = im[j][i] = score.score;
 			om[i][j] = om[j][i] = score.orientation;
 			am[i][j] = score.alignment; am[j][i] = -score.alignment;
@@ -58,7 +59,7 @@ void score_pairs(PeptideSet& ps, ScoringEngineType& sc, int max_heptad_displacem
 int main(int argc, char **argv) {
 	Options options(argc, argv);
 
-	auto max_heptad_displacement = options.max_heptad_displacement;
+	auto& alignment = options.alignment;
 	auto orientation = options.orientation;
 
 	auto fasta_path = options.fasta_path.string();
@@ -72,11 +73,11 @@ int main(int argc, char **argv) {
 	auto score_func = options.score_func;
 	if (score_func == ScoringOptions::ScoreFunc::potapov) {
 		ScoringHelper<ScoringEnginePotapov> sc;
-		score_pairs(ps, sc, max_heptad_displacement, orientation, im, om, am);
+		score_pairs(ps, sc, alignment, orientation, im, om, am);
 	}
 	else if (score_func == ScoringOptions::ScoreFunc::bcipa) {
 		ScoringHelper<ScoringEngineBCIPA> sc;
-		score_pairs(ps, sc, max_heptad_displacement, orientation, im, om, am);
+		score_pairs(ps, sc, alignment, orientation, im, om, am);
 	}
 
 	return 0;
