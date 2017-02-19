@@ -80,7 +80,7 @@ float ScoringEngineBCIPA::score(string_view chain1, string_view chain2) /*
 		}
 	}
 
-	return 81.3256f * hp_sum / n_pairs - 10.5716f * c_sum - 4.7771f * es_sum - 29.1320f - 273;
+	return -(81.3256f * hp_sum / n_pairs - 10.5716f * c_sum - 4.7771f * es_sum - 29.1320f - 273);
 }
 
 float ScoringEngineBCIPA::hp_score(const char c) {
