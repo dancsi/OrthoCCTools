@@ -91,8 +91,8 @@ struct ScoringHelper {
 		aligned_score_t best_score{ std::numeric_limits<float>::infinity(), 0 };
 
 		for (int displacement = 0; displacement <= max_heptad_displacement; displacement++) {
-			aligned_score_t left_trimmed_score = { sc.score(chain1.substr(0, len), left_trimmed), +displacement };
-			aligned_score_t right_trimmed_score = { sc.score(chain1.substr(0, len), right_trimmed), -displacement };
+			aligned_score_t left_trimmed_score = { sc.score(chain1.substr(0, len), left_trimmed), +7 * displacement };
+			aligned_score_t right_trimmed_score = { sc.score(chain1.substr(0, len), right_trimmed), -7 * displacement };
 
 			if (left_trimmed_score < best_score) best_score = left_trimmed_score;
 			if (right_trimmed_score < best_score) best_score = right_trimmed_score;
