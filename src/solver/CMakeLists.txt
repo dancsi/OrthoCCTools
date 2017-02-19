@@ -13,5 +13,5 @@ set(SOLVER_ALL ${SOLVER_SOURCES} ${SOLVER_HEADERS})
 
 add_subdirectory(mcqd_para)
 
-add_executable(solver ${SOLVER_ALL} ${COMMON_ALL})
-target_link_libraries(solver spdlog flags MemoryMapped mcqd_para ${EXTERNAL_LIBRARIES})
+add_executable(solver ${SOLVER_ALL})
+target_link_libraries(solver common spdlog flags MemoryMapped mcqd_para ${EXTERNAL_LIBRARIES})

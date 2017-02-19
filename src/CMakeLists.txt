@@ -10,8 +10,6 @@ CHECK_EXPERIMENTAL_INCLUDE("string_view")
 CHECK_EXPERIMENTAL_INCLUDE("filesystem")
 CHECK_INCLUDE_FILE_CXX("experimental/array" "HAVE_EXPERIMENTAL_array")
 
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/common/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/common/config.h)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(external)

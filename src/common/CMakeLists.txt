@@ -11,4 +11,10 @@ set(COMMON_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/PeptideSet.h
 )
 
-set(COMMON_ALL ${COMMON_SOURCES} ${COMMON_HEADERS} PARENT_SCOPE)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+add_library(common ${COMMON_SOURCES} ${COMMON_HEADERS})
+target_link_libraries(common spdlog)
+
+target_include_directories(common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})

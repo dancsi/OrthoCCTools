@@ -8,4 +8,5 @@ if(WIN32)
 endif()
 
 add_library(MemoryMapped ${SOURCES})
+target_link_libraries(MemoryMapped common)
 target_include_directories(MemoryMapped SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

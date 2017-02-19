@@ -6,7 +6,8 @@ set(SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/spdlog.h
 	${CMAKE_CURRENT_SOURCE_DIR}/tweakme.h)
 
-add_library(spdlog INTERFACE )
+add_library(spdlog INTERFACE)
 target_include_directories(spdlog INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../)
+message("Included ${CMAKE_CURRENT_SOURCE_DIR}/../")
 
 #target_sources(spdlog INTERFACE ${SOURCES})

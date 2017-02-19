@@ -18,4 +18,4 @@ set(HEADERS
 )
 
 add_library(mcqd_para ${SOURCES} ${HEADERS})
-target_include_directories(mcqd_para SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(mcqd_para PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -65,6 +65,8 @@ namespace ScoringOptions {
 			orientation(orientation)
 		{}
 	};
+
+	enum class ScoreFunc {potapov, bcipa};
 }
 
 template<typename ScoringEngine>

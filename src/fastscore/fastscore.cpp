@@ -4,7 +4,7 @@
 
 #include "common/experimental_cxx_features.h"
 
-#include "flags.h"
+#include "options.h"
 
 #include "ScoringHelper.h"
 #include "ScoringEnginePotapov.h"
@@ -17,18 +17,6 @@ namespace fs = std::experimental::filesystem;
 
 using OrientationMatrix = SquareMatrix<ScoringOptions::Orientation>;
 using AlignmentMatrix = SquareMatrix<ScoringOptions::alignment_t>;
-
-void print_usage_and_exit() {
-	puts(R"(
-USAGE: fastscore INPUT [OPTIONS...]
-Available options:
-    --basename=PATH                 specify output base name
-    --max-heptad-displacement=NUM   try shifting the peptides left and right by this many heptads
-    --orientation={parallel, antiparallel, both}
-	--score-func={potapov, bcipa}   choose scoring function
-)");
-	exit(1);
-}
 
 template<typename ScoringEngineType>
 void score_pairs(PeptideSet& ps, ScoringEngineType& sc, int max_heptad_displacement, ScoringOptions::Orientation orientation, InteractionMatrix& im, OrientationMatrix& om, AlignmentMatrix& am) {
@@ -68,48 +56,27 @@ void score_pairs(PeptideSet& ps, ScoringEngineType& sc, int max_heptad_displacem
 }
 
 int main(int argc, char **argv) {
-	const flags::args args(argc, argv);
+	Options options(argc, argv);
 
-	auto&& positional = args.positional();
-	if (positional.empty()) print_usage_and_exit();
-	auto fasta_path = fs::path(positional[0].data());
+	auto max_heptad_displacement = options.max_heptad_displacement;
+	auto orientation = options.orientation;
 
-	string basename{ (fasta_path.parent_path() / fasta_path.stem()).string() };
-	basename = args.get<std::string>("basename").value_or(basename);
+	auto fasta_path = options.fasta_path.string();
+	auto basename = options.basename;
 
-	int max_heptad_displacement = args.get<int>("max-heptad-displacement", 0);
-
-	string orientation_str = args.get<string>("orientation", "parallel");
-	auto orientation = ScoringOptions::Orientation::invalid;
-	if (orientation_str == "parallel") {
-		orientation = ScoringOptions::Orientation::parallel;
-	}
-	else if (orientation_str == "antiparallel") {
-		orientation = ScoringOptions::Orientation::antiparallel;
-	}
-	else if (orientation_str == "both") {
-		orientation = ScoringOptions::Orientation::both;
-	}
-	else {
-		print_usage_and_exit();
-	}
-
-	PeptideSet ps(fasta_path.string());
+	PeptideSet ps(fasta_path);
 	InteractionMatrix im{ basename + ".bin", ps.size() };
 	OrientationMatrix om{ basename + ".orientation.bin", ps.size() };
 	AlignmentMatrix am{ basename + ".align.bin", ps.size() };
 
-	auto score_func = args.get<string>("score-func", "potapov");
-	if (score_func == "potapov") {
+	auto score_func = options.score_func;
+	if (score_func == ScoringOptions::ScoreFunc::potapov) {
 		ScoringHelper<ScoringEnginePotapov> sc;
 		score_pairs(ps, sc, max_heptad_displacement, orientation, im, om, am);
 	}
-	else if (score_func == "bcipa") {
+	else if (score_func == ScoringOptions::ScoreFunc::bcipa) {
 		ScoringHelper<ScoringEngineBCIPA> sc;
 		score_pairs(ps, sc, max_heptad_displacement, orientation, im, om, am);
-	}
-	else {
-		print_usage_and_exit();
 	}
 
 	return 0;
