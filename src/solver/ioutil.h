@@ -9,6 +9,8 @@
 #include <cstring>
 #include <cmath>
 
+#include "common/SpecialMatrices.h"
+
 #include "mcqd_para/MaximumCliqueBase.h"
 #include "mcqd_para/ParallelMaximumClique.h"
 #include "mcqd_para/BB_GreedyColorSort.h"
@@ -151,38 +153,10 @@ float** allocate_matrix_pointers(float* data, int n)
 
 float **read_scores_binary(std::string score_file, std::string fasta_name)
 {
-	int fd = open(score_file.c_str(), O_RDONLY, 0600);
+	static InteractionMatrix im(score_file);
+	float* score_storage = im[0];
 
-	if (fd == -1)
-	{
-		perror("Error opening file for writing");
-		exit(EXIT_FAILURE);
-	}
-
-	struct stat64 fileInfo = { 0 };
-
-	if (fstat64(fd, &fileInfo) == -1)
-	{
-		perror("Error getting the file size");
-		exit(EXIT_FAILURE);
-	}
-
-	if (fileInfo.st_size == 0)
-	{
-		fprintf(stderr, "Error: File is empty, nothing to do\n");
-		exit(EXIT_FAILURE);
-	}
-
-	printf("File size is %ji\n", (intmax_t)fileInfo.st_size);
-
-	float* score_storage = (float*)mmap(0, fileInfo.st_size, PROT_READ, MAP_SHARED, fd, 0);
-	if (score_storage == MAP_FAILED)
-	{
-		close(fd);
-		perror("Error mmapping the file");
-		exit(EXIT_FAILURE);
-	}
-	size_t n_peptides = (size_t)sqrt(fileInfo.st_size / 4);
+	size_t n_peptides = im.get_dimensions().first;
 
 	std::ifstream fasta_file(fasta_name);
 	assert(fasta_file.good());

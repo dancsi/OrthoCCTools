@@ -1,23 +1,17 @@
-cmake_minimum_required(VERSION 3.2)
-project(CCOrtho)
+set(SOLVER_SOURCES 
+	${CMAKE_CURRENT_SOURCE_DIR}/solver.cpp
+)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(SOLVER_HEADERS
+	${CMAKE_CURRENT_SOURCE_DIR}/common.h
+	${CMAKE_CURRENT_SOURCE_DIR}/ioutil.h
+	${CMAKE_CURRENT_SOURCE_DIR}/options.h
+	${CMAKE_CURRENT_SOURCE_DIR}/getopt.h
+)
 
-set(SOURCE_FILES
-        mcqd_para/BB_ColorRSort.h
-        mcqd_para/BB_GreedyColorSort.h
-        mcqd_para/BitSet.cpp
-        mcqd_para/BitSet.h
-        mcqd_para/DegreeAndNumberSort.h
-        mcqd_para/DegreeSort.h
-        mcqd_para/GreedyColorSort.h
-        mcqd_para/KillTimer.h
-        mcqd_para/MaximumCliqueBase.h
-        mcqd_para/McrBB.h
-        mcqd_para/ParallelMaximumClique.h
-        mcqd_para/SteadyGreedyColorSort.h
-        mcqd_para/Timer.h
-        options.h
-        solver.cpp)
+set(SOLVER_ALL ${SOLVER_SOURCES} ${SOLVER_HEADERS})
 
-add_executable(solver ${SOURCE_FILES})
+add_subdirectory(mcqd_para)
+
+add_executable(solver ${SOLVER_ALL} ${COMMON_ALL})
+target_link_libraries(solver spdlog flags MemoryMapped mcqd_para ${EXTERNAL_LIBRARIES})
