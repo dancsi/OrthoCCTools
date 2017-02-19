@@ -41,7 +41,7 @@ namespace detail {
 }
 
 namespace ScoringOptions {
-	enum class Orientation : uint8_t { invalid, parallel, antiparallel, both };
+	enum class Orientation : uint8_t { parallel, antiparallel, both, invalid };
 	typedef int8_t alignment_t;
 
 	struct aligned_score_t {
