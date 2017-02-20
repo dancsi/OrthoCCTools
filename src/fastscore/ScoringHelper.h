@@ -90,7 +90,7 @@ struct ScoringHelper {
 		auto buffer1_size = n1 + 2 * max_displacement;
 		auto buffer2_size = n2 + 2 * max_displacement;
 
-		static std::vector<char> buf1(buffer1_size, '-'), buf2(buffer2_size, '-');
+		static thread_local std::vector<char> buf1(buffer1_size, '-'), buf2(buffer2_size, '-');
 		if (buf1.size() < buffer1_size) buf1.resize(buffer1_size, '-');
 		if (buf2.size() < buffer2_size) buf2.resize(buffer2_size, '-');
 
@@ -134,7 +134,7 @@ struct ScoringHelper {
 
 	aligned_oriented_score_t score(std::string_view chain1, std::string_view chain2, const std::vector<alignment_t>& alignment, Orientation orientation)
 	{
-		static std::string buf;
+		static thread_local std::string buf;
 		aligned_oriented_score_t parallel_score, antiparallel_score;
 
 		if (orientation == Orientation::antiparallel || orientation == Orientation::both) {

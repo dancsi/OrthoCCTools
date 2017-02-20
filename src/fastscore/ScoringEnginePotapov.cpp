@@ -58,7 +58,7 @@ float ScoringEnginePotapov::generic_score(string_view chain1, string_view chain2
 		if (tuple.max_pos() >= max_length) break;
 		auto& weight_array = weight_vec[tuple.weight_array_index];
 
-		static char buf[k];
+		char buf[k];
 		for (int i = 0; i < k; i++) {
 			auto chain_id = tuple.res[i].chain_id;
 			auto pos = tuple.res[i].pos;

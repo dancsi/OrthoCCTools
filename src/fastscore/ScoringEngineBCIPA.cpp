@@ -98,7 +98,7 @@ float ScoringEngineBCIPA::es_score(const char c1, const char c2) {
 }
 
 inline float ScoringEngineBCIPA::generic_pair_score(const char c1, const char c2, weights_t& weights) {
-	static char buf[2];
+	char buf[2];
 	buf[0] = c1;
 	buf[1] = c2;
 
