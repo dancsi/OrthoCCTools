@@ -60,6 +60,7 @@ void score_pairs(PeptideSet& ps, ScoringEngineType& sc, std::vector<alignment_t>
 
 int main(int argc, char **argv) {
 	Options options(argc, argv);
+	options.print_parsed();
 
 	auto& alignment = options.alignment;
 	auto orientation = options.orientation;

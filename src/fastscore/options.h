@@ -96,4 +96,39 @@ Available options:
 			print_usage_and_exit();
 		}
 	}
+
+	void print_parsed() {
+		using std::cerr;
+		using std::endl;
+		cerr << "Fasta path is " << fasta_path.string() << endl;
+		cerr << "Output basename is" << basename << endl;
+
+		cerr << "Considered alignments (absolute values)\n  ";
+		for (auto x : alignment) cerr << x << " ";
+		cerr << endl;
+
+		cerr << "Considered orientations are " << [](ScoringOptions::Orientation o) {
+			switch (o) {
+			case ScoringOptions::Orientation::parallel:
+				return "parallel";
+			case ScoringOptions::Orientation::antiparallel:
+				return "antiparallel";
+			case ScoringOptions::Orientation::both:
+				return "both";
+			default:
+				return "invalid";
+			}
+		}(orientation) << endl;
+
+		cerr << "Used scoring function is " << [](ScoringOptions::ScoreFunc sfunc) {
+			switch (sfunc) {
+			case ScoringOptions::ScoreFunc::potapov:
+				return "potapov";
+			case ScoringOptions::ScoreFunc::bcipa:
+				return "bcipa";
+			default:
+				return "invalid";
+			}
+		}(score_func) << endl;
+	}
 };
