@@ -37,16 +37,18 @@ void score_pairs(PeptideSet& ps, ScoringEngineType& sc, std::vector<alignment_t>
 			am[i][j] = score.alignment; am[j][i] = -score.alignment;
 			items_processed_total++;
 		}
+#pragma omp critical 
+		{
+			if (items_processed_total - items_processed_prev > reporting_interval) {
+				auto time_current = chrono::high_resolution_clock::now();
+				chrono::duration<double> time_elapsed = time_current - time_prev;
+				float speed = 100.0 * (items_processed_total - items_processed_prev) / time_elapsed.count() / items_to_process;
 
-		if (items_processed_total - items_processed_prev > reporting_interval) {
-			auto time_current = chrono::high_resolution_clock::now();
-			chrono::duration<double> time_elapsed = time_current - time_prev;
-			float speed = 100.0 * (items_processed_total - items_processed_prev) / time_elapsed.count() / items_to_process;
+				fprintf(stderr, "%.2f %%, %.2f %% / sec\n", 100.0 * items_processed_total / items_to_process, speed);
 
-			printf("%.2f %%, %.2f %% / sec\n", 100.0 * items_processed_total / items_to_process, speed);
-
-			items_processed_prev = items_processed_total;
-			time_prev = time_current;
+				items_processed_prev = items_processed_total;
+				time_prev = time_current;
+			}
 		}
 	}
 
