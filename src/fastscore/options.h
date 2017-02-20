@@ -4,6 +4,7 @@
 #include "ScoringHelper.h"
 
 #include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <set>
 #include <string>
@@ -72,16 +73,15 @@ Available options:
 		}
 
 		string orientation_str = args.get<string>("orientation", "parallel");
-		if (orientation_str == "parallel") {
-			orientation = ScoringOptions::Orientation::parallel;
-		}
-		else if (orientation_str == "antiparallel") {
-			orientation = ScoringOptions::Orientation::antiparallel;
-		}
-		else if (orientation_str == "both") {
-			orientation = ScoringOptions::Orientation::both;
-		}
-		else {
+		char first_char = std::toupper(orientation_str[0]);
+		switch (first_char) {
+		case 'P':
+			orientation = ScoringOptions::Orientation::parallel; break;
+		case 'A':
+			orientation = ScoringOptions::Orientation::antiparallel; break;
+		case 'B':
+			orientation = ScoringOptions::Orientation::both; break;
+		default:
 			print_usage_and_exit();
 		}
 
