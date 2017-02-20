@@ -10,7 +10,7 @@ CHECK_EXPERIMENTAL_INCLUDE("string_view")
 CHECK_EXPERIMENTAL_INCLUDE("filesystem")
 CHECK_INCLUDE_FILE_CXX("experimental/array" "HAVE_EXPERIMENTAL_array")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(external)
 add_subdirectory(common)

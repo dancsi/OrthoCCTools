@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config.h"
+#include "common/config.h"
 
 #ifdef HAVE_optional
 #include <optional>

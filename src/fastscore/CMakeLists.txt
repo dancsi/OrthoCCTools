@@ -17,3 +17,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scores.dat ${CMAKE_CURRENT_BINARY_DIR
 
 add_executable(fastscore ${FASTSCORE_ALL})
 target_link_libraries(fastscore common flags MemoryMapped ${EXTERNAL_LIBRARIES})
+
+install(TARGETS fastscore RUNTIME DESTINATION .)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/scores.dat DESTINATION .)
+
+target_include_directories(fastscore PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../common/)

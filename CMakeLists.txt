@@ -27,5 +27,5 @@ elseif(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /openmp")
 endif()
 
-
+INCLUDE_DIRECTORIES(${ADDITIONAL_INCLUDES}/src)
 ADD_SUBDIRECTORY(src)
