@@ -6,9 +6,10 @@
 
 #include "options.h"
 
-#include "ScoringHelper.h"
-#include "ScoringEnginePotapov.h"
-#include "ScoringEngineBCIPA.h"
+#include "scoring/ScoringHelper.h"
+#include "scoring/ScoringEnginePotapov.h"
+#include "scoring/ScoringEngineBCIPA.h"
+
 #include "common/PeptideSet.h"
 #include "common/SpecialMatrices.h"
 

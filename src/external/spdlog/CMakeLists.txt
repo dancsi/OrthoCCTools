@@ -8,6 +8,5 @@ set(SOURCES
 
 add_library(spdlog INTERFACE)
 target_include_directories(spdlog INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../)
-message("Included ${CMAKE_CURRENT_SOURCE_DIR}/../")
 
 #target_sources(spdlog INTERFACE ${SOURCES})

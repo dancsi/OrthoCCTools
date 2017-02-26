@@ -1,7 +1,7 @@
 #pragma once
 
 #include "flags.h"
-#include "ScoringHelper.h"
+#include "scoring/ScoringHelper.h"
 
 #include <algorithm>
 #include <cctype>
