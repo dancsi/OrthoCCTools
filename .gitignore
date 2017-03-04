@@ -28,6 +28,20 @@
 *.out
 *.app
 
+# LaTeX files
+*.apc
+*.aux
+*.bbl
+*.blg
+*.brf
+*.lof
+*.log
+*.lot
+*.nav
+*.snm
+*.synctex.gz
+*.toc
+
 # Folders
 .vs/
 build/
