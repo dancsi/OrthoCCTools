@@ -36,14 +36,14 @@ void PeptideSet::read(std::string_view path)
 				id = std::string("L") + std::to_string(line_count);
 			}
 
-			storage.emplace_back(sequence, id);
+			storage.emplace_back(sequence, id, (short)('f' - 'a'));
 		}
 	}
 }
 
-inline void PeptideSet::write(std::string & path)
+inline void PeptideSet::write(std::string_view path)
 {
-	std::ofstream output(path);
+	std::ofstream output(path.data());
 	for (auto&& peptide : storage)
 	{
 		output << ">" << peptide.id << std::endl;
