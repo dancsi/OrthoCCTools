@@ -1,11 +1,12 @@
 #include "PeptideSet.h"
 
-void PeptideSet::read(std::string_view path)
+void PeptideSet::read(std::experimental::filesystem::path path)
 {
-	std::ifstream input(path.data());
+	std::ifstream input(path.string());
+
 	if (!input.is_open())
 	{
-		throw std::runtime_error("");
+		throw std::runtime_error("Could not open input");
 	}
 
 	std::string line, id, sequence;
@@ -36,15 +37,15 @@ void PeptideSet::read(std::string_view path)
 				id = std::string("L") + std::to_string(line_count);
 			}
 
-			storage.emplace_back(sequence, id, (short)('f' - 'a'));
+			emplace_back( sequence, id, (short)('f' - 'a') );
 		}
 	}
 }
 
-inline void PeptideSet::write(std::string_view path)
+void PeptideSet::write(std::string_view path)
 {
 	std::ofstream output(path.data());
-	for (auto&& peptide : storage)
+	for (auto&& peptide : *this)
 	{
 		output << ">" << peptide.id << std::endl;
 		output << peptide.sequence << std::endl;

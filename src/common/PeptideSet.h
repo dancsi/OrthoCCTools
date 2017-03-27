@@ -37,16 +37,14 @@ public:
 
 class PeptideSet : public std::vector<Peptide>
 {
-private:
-	std::vector<Peptide> storage;
 
 public:
 	PeptideSet() {}
-	PeptideSet(std::string_view path)
+	PeptideSet(std::experimental::filesystem::path path)
 	{
 		read(path);
 	}
 
-	void read(std::string_view path);
+	void read(std::experimental::filesystem::path path);
 	void write(std::string_view path);
 };
