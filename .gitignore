@@ -50,3 +50,5 @@ build-win/
 /src/common/config.h
 /reference
 /data
+
+*.pyc

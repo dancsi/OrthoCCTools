@@ -28,7 +28,7 @@ Available options:
 		exit(1);
 	}
 
-	fs::path fasta_path;
+	fs::path fasta_path, current_executable_path;
 	std::string basename;
 	std::vector<ScoringOptions::alignment_t> alignment;
 	ScoringOptions::Orientation orientation;
@@ -50,6 +50,8 @@ Available options:
 
 	Options(int argc, char** argv) : args(argc, argv) {
 		using std::string;
+
+		current_executable_path = argv[0];
 
 		auto&& positional = args.positional();
 		if (positional.empty()) print_usage_and_exit();

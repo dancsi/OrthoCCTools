@@ -10,6 +10,7 @@
 #include <cmath>
 
 #include "common/SpecialMatrices.h"
+#include "common/experimental_cxx_features.h"
 
 #include "mcqd_para/MaximumCliqueBase.h"
 #include "mcqd_para/ParallelMaximumClique.h"
@@ -86,7 +87,7 @@ void dump_dimacs(std::vector<std::vector<char>>& conn, const char *fname)
 	fclose(fout);
 }
 
-void print_clique(const string out_name, const BitstringSet& clique, Graph<BitstringSet>& graph, bool overwrite = true)
+void print_clique(const string out_name, const BitstringSet& clique, Graph<BitstringSet>& graph, std::string_view cmdline, bool overwrite = true)
 {
 	stringstream ss;
 	bool comma = false;
@@ -112,7 +113,9 @@ void print_clique(const string out_name, const BitstringSet& clique, Graph<Bitst
 	printf("%s", ss.str().c_str());
 
 	FILE* fout = fopen(out_name.c_str(), overwrite ? "w" : "a");
-	if (!overwrite) fprintf(fout, "#######################\n");
+	if (overwrite) fprintf(fout, "%s\n", cmdline.data());
+	else fprintf(fout, "#######################\n");
+
 	fprintf(fout, "%s", ss.str().c_str());
 	fclose(fout);
 }

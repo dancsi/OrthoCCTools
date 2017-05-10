@@ -68,6 +68,15 @@ bool will_interact_with_initial(pair<int, int> potential_pair)
 int max_count = 0;
 struct ProgressReporter
 {
+	static string cmdline;
+	static void set_cmdline(int argc, char** argv) {
+		cmdline.clear();
+		for (int i = 0; i < argc; i++) {
+			cmdline += argv[i] + " "s;
+		}
+		cmdline.pop_back();
+	}
+
 	void operator()(const BitstringSet& clique) {
 		bool overwrite = false;
 		if (clique.size() > max_count)
@@ -75,9 +84,10 @@ struct ProgressReporter
 			max_count = clique.size();
 			overwrite = true;
 		}
-		print_clique((out_name + ".current").c_str(), clique, graph, overwrite);
+		print_clique(out_name.c_str(), clique, graph, cmdline, overwrite);
 	};
 };
+std::string ProgressReporter::cmdline;
 
 int main(int argc, char** argv)
 {
@@ -99,10 +109,13 @@ int main(int argc, char** argv)
 		c2 = options::get("nonbinding-cutoff", -7.f);
 		search_homodimers = !options::get("hetero-only", false);
 		search_heterodimers = !options::get("homo-only", false);
-		out_name = options::get("out-name", string("output.txt"));
 
-		string default_fasta_name = basename(fname)+".fasta";
+		string default_fasta_name = basename(fname) + ".fasta";
 		fasta_name = options::get("fasta-name", default_fasta_name);
+
+		string default_output_name = basename(fname) + ".pairs";
+		out_name = options::get("out-name", default_output_name);
+		ProgressReporter::set_cmdline(argc, argv);
 
 		if(!(search_homodimers || search_heterodimers))
 		{
@@ -188,7 +201,7 @@ int main(int argc, char** argv)
     problem.search(n_threads, n_jobs, affinities);
     problem.outputStatistics(false); std::cout << "\n";
     std::cout << "Thread efficiency = " << std::setprecision(3) << problem.workerEfficiency() << "\n\n";
-    print_clique(out_name, problem.getClique(), graph);
+    //print_clique(out_name, problem.getClique(), graph, "");
 
 	clock_t stop_time = clock();
 	printf( "Total elapsed time: %.2lfs\n", double(stop_time - start_time)/CLOCKS_PER_SEC);

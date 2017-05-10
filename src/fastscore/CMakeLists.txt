@@ -14,3 +14,6 @@ target_link_libraries(fastscore common scoring flags MemoryMapped ${EXTERNAL_LIB
 target_include_directories(fastscore PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../common/)
 
 install(TARGETS fastscore RUNTIME DESTINATION .)
+
+add_custom_command(TARGET fastscore POST_BUILD
+				   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../scoring/scores.dat" $<TARGET_FILE_DIR:fastscore>)

@@ -16,13 +16,10 @@ ScoringEnginePotapov::ScoringEnginePotapov(string_view weights_path, int max_pep
 
 	path path(weights_path.data());
 	if (!exists(path)) {
-		if (path.is_relative()) {
-			auto newpath = current_path().parent_path() / path;
-			if (exists(newpath)) path = newpath;
-			else goto fail;
-		}
+		auto newpath = current_path() / path.filename();
+		if (exists(newpath))
+			path = newpath;
 		else {
-		fail:
 			throw std::runtime_error("Requested path"s + path.string() + "does not exist"s);
 		}
 	}

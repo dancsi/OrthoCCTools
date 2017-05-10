@@ -76,7 +76,8 @@ int main(int argc, char **argv) {
 
 	auto score_func = options.score_func;
 	if (score_func == ScoringOptions::ScoreFunc::potapov) {
-		ScoringHelper<ScoringEnginePotapov> sc;
+		auto weights_path = options.current_executable_path.parent_path() / "scores.dat";
+		ScoringHelper<ScoringEnginePotapov> sc(weights_path.string());
 		score_pairs(ps, sc, alignment, orientation, im, om, am);
 	}
 	else if (score_func == ScoringOptions::ScoreFunc::bcipa) {
