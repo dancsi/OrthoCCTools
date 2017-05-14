@@ -55,7 +55,12 @@ Available options:
 
 		auto&& positional = args.positional();
 		if (positional.empty()) print_usage_and_exit();
+
 		fasta_path = fs::path(positional[0].data());
+		if (!fs::exists(fasta_path)) {
+			std::cout << "The specified fasta path "<<fasta_path.string()<<" does not exist\n";
+			exit(1);
+		}
 
 		basename = args.get<string>("basename", (fasta_path.parent_path() / fasta_path.stem()).string());
 
@@ -103,7 +108,7 @@ Available options:
 		using std::cerr;
 		using std::endl;
 		cerr << "Fasta path is " << fasta_path.string() << endl;
-		cerr << "Output basename is" << basename << endl;
+		cerr << "Output basename is " << basename << endl;
 
 		cerr << "Considered alignments (absolute values)\n  ";
 		for (auto x : alignment) cerr << x << " ";

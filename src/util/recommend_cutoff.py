@@ -11,46 +11,48 @@ from pathlib import Path
 weak_percentile = 0.21450289100201259
 strong_percentile = 0.0033595580728521786
 
-path = Path(sys.argv[1] if len(sys.argv) >
-            1 else r"""..\..\data\dipeptide-at-least-four.bin""")
 
-if not path.exists():
-    print("Path", path, "does not exist")
-    sys.exit(1)
-
-data = load(str(path))
-
-
-def hist(data, nbins=100):
+def recommend(data, nbins=100, plot=False):
     data = data.flatten()
     h, bins = np.histogram(data, bins=nbins, density=True)
     minmax = (min(bins), max(bins))
-    plt.bar(bins[:-1], h, width=(minmax[1] - minmax[0]) / nbins)
-    plt.xlim(minmax)
 
-    mu, std = norm.fit(data)
     real_dist = rv_histogram((h, bins))
-
-    x = (bins[1:] + bins[:-1]) / 2
-    gauss = norm.pdf(x, mu, std)
-    plt.plot(x, gauss, 'k.')
 
     weak_cutoff = real_dist.ppf(weak_percentile)
     strong_cutoff = real_dist.ppf(strong_percentile)
 
+    mu, std = norm.fit(data)
     weak_cutoff_gaussian = norm.ppf(weak_percentile, mu, std)
     strong_cutoff_gaussian = norm.ppf(strong_percentile, mu, std)
 
-    plt.axvline(x=weak_cutoff, color='r')
-    plt.axvline(x=strong_cutoff, color='r')
+    if plot:
+        plt.bar(bins[:-1], h, width=(minmax[1] - minmax[0]) / nbins)
+        plt.xlim(minmax)
 
-    plt.axvline(x=weak_cutoff_gaussian, color='k')
-    plt.axvline(x=strong_cutoff_gaussian, color='k')
+        x = (bins[1:] + bins[:-1]) / 2
+        gauss = norm.pdf(x, mu, std)
+        plt.plot(x, gauss, 'k.')
 
-    plt.show()
+        plt.axvline(x=weak_cutoff, color='r')
+        plt.axvline(x=strong_cutoff, color='r')
 
-    return weak_cutoff, strong_cutoff
+        plt.axvline(x=weak_cutoff_gaussian, color='k')
+        plt.axvline(x=strong_cutoff_gaussian, color='k')
+
+        plt.show()
+
+    return strong_cutoff, weak_cutoff
 
 
-cutoffs = hist(data)
-print(cutoffs)
+if __name__ == "__main__":
+    path = Path(sys.argv[1] if len(sys.argv) >
+                1 else r"""..\..\data\dipeptide-at-least-four.bin""")
+
+    if not path.exists():
+        print("Path", path, "does not exist")
+        sys.exit(1)
+
+    data = load(str(path))
+    cutoffs = recommend(data, plot=True)
+    print(*cutoffs)
