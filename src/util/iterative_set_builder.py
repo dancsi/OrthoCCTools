@@ -19,7 +19,8 @@ def compute_orthoset(fasta_path, output_name):
     output_pairs = temp_dir / (output_name + '.pairs')
     score_basepath = output_pairs.with_suffix('')
 
-    #run([r'..\..\build-win\fastscore', str(fasta_path),         '--basename={}'.format(score_basepath)])
+    run([r'..\..\build-win\fastscore', str(fasta_path),
+         '--basename={}'.format(score_basepath)])
     bin_path = score_basepath.with_suffix('.bin')
     print('Calculated', bin_path)
 

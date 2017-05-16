@@ -29,7 +29,7 @@ void score_pairs(PeptideSet& ps, ScoringEngineType& sc, std::vector<alignment_t>
 
 	auto start = chrono::high_resolution_clock::now();
 	auto time_prev = start;
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 4)
 	for (int i = 0; i < n; i++) {
 		for (int j = i; j < n; j++) {
 			auto score = sc.score(ps[i].sequence, ps[j].sequence, alignment, orientation);

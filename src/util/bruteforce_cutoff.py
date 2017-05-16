@@ -64,7 +64,7 @@ def bruteforce(path, fasta_path=None):
             temp_dir / "cutoff_bruteforce_{}.txt".format(idx)).relative_to(Path.cwd())
         try:
             run([r'..\..\build-win\solver', str(path), '--binding-cutoff={}'.format(
-                binding_cutoff), '--nonbinding-cutoff={}'.format(nonbinding_cutoff), '--out-name={}'.format(output_path), '--fasta-name={}'.format(fasta_path)], timeout=None)
+                binding_cutoff), '--nonbinding-cutoff={}'.format(nonbinding_cutoff), '--out-name={}'.format(output_path), '--fasta-name={}'.format(fasta_path)], stdout=DEVNULL, stderr=DEVNULL, timeout=5)
         except TimeoutExpired:
             print('Timeout expired for cutoffs', binding_cutoff,
                   nonbinding_cutoff, file=sys.stderr)
