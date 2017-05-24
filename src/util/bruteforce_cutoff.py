@@ -1,10 +1,13 @@
-import os
+import argparse
+import csv
 import math
+import os
 import sys
+from collections import namedtuple
+from pathlib import Path
+from subprocess import DEVNULL, TimeoutExpired, run
 
 import numpy as np
-from pathlib import Path
-from subprocess import run, DEVNULL, TimeoutExpired
 
 from matrix_loader import load
 from recommend_cutoff import recommend
@@ -26,11 +29,11 @@ def count_pairs(path):
     return cnt
 
 
-delta = 1  # difference between thresholds
-step = 0.5
+BruteforceResult = namedtuple("BruteforceResult", [
+                              "binding_cutoff", "nonbinding_cutoff", "binding_cutoffs", "nonbinding_cutoffs", "num_pairs", "best_cutoff_idx", "temp_dir"])
 
 
-def bruteforce(path, fasta_path=None):
+def bruteforce(path, fasta_path=None, fast_exit=True, delta=1, step=0.5, timeout=5):
     if not path.exists():
         print("Path", path, "does not exist")
         sys.exit(1)
@@ -64,7 +67,7 @@ def bruteforce(path, fasta_path=None):
             temp_dir / "cutoff_bruteforce_{}.txt".format(idx)).relative_to(Path.cwd())
         try:
             run([r'..\..\build-win\solver', str(path), '--binding-cutoff={}'.format(
-                binding_cutoff), '--nonbinding-cutoff={}'.format(nonbinding_cutoff), '--out-name={}'.format(output_path), '--fasta-name={}'.format(fasta_path)], stdout=DEVNULL, stderr=DEVNULL, timeout=5)
+                binding_cutoff), '--nonbinding-cutoff={}'.format(nonbinding_cutoff), '--out-name={}'.format(output_path), '--fasta-name={}'.format(fasta_path)], stdout=DEVNULL, stderr=DEVNULL, timeout=timeout)
         except TimeoutExpired:
             print('Timeout expired for cutoffs', binding_cutoff,
                   nonbinding_cutoff, file=sys.stderr)
@@ -76,22 +79,42 @@ def bruteforce(path, fasta_path=None):
         if n_pairs > max_num_pairs:
             max_num_pairs = n_pairs
             best_cutoff_idx = idx
-        elif n_pairs != 0:
+        if n_pairs != 0:
             num_pairs_list.append(n_pairs)
-            if len(num_pairs_list) >= 3:
+            if fast_exit and len(num_pairs_list) >= 3:
                 if num_pairs_list[-1] < num_pairs_list[-2] < num_pairs_list[-3]:
                     print('Last 3 scores were decreasing, aborting search',
                           file=sys.stderr)
                     break
 
-    best_cutoff = binding_cutoffs[best_cutoff_idx]
-
-    return (best_cutoff, best_cutoff + delta)
+    return BruteforceResult(binding_cutoff=binding_cutoffs[best_cutoff_idx],                            nonbinding_cutoff=nonbinding_cutoffs[best_cutoff_idx],
+                            binding_cutoffs=binding_cutoffs,
+                            nonbinding_cutoffs=nonbinding_cutoffs,
+                            num_pairs=num_pairs_list,
+                            best_cutoff_idx=best_cutoff_idx,
+                            temp_dir=temp_dir)
 
 
 if __name__ == "__main__":
-    path = Path(sys.argv[1]) if len(
-        sys.argv) > 1 else Path(r'..\..\data\PNIC.bin')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path', type=Path)
+    parser.add_argument('--delta', default=1, type=float)
+    parser.add_argument('--step', default=0.5, type=float)
+    parser.add_argument('--fast_exit', action='store_true')
+    parser.add_argument('--timeout', default=5, type=float)
+    args = parser.parse_args()
 
-    cutoffs = bruteforce(path)
-    print(*cutoffs)
+    cutoffs = bruteforce(args.path, delta=args.delta, step=args.step,
+                         fast_exit=args.fast_exit, timeout=args.timeout)
+
+    print(cutoffs.nonbinding_cutoff, cutoffs.binding_cutoff)
+    print(cutoffs.nonbinding_cutoffs)
+    print(cutoffs.binding_cutoffs)
+    print(cutoffs.num_pairs)
+
+    csv_rows = zip(cutoffs.nonbinding_cutoffs, cutoffs.binding_cutoffs,
+                   cutoffs.num_pairs)
+
+    with open(cutoffs.temp_dir / "cutoff_bruteforce.csv", 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        writer.writerows(csv_rows)

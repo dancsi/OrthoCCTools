@@ -24,7 +24,8 @@ def compute_orthoset(fasta_path, output_name):
     bin_path = score_basepath.with_suffix('.bin')
     print('Calculated', bin_path)
 
-    (binding_cutoff, nonbinding_cutoff) = bruteforce(bin_path, fasta_path)
+    cutoffs = bruteforce(bin_path, fasta_path)
+    binding_cutoff, nonbinding_cutoff = cutoffs.binding_cutoff, cutoffs.nonbinding_cutoff
 
     run([r'..\..\build-win\solver', str(bin_path), '--binding-cutoff={}'.format(
         binding_cutoff), '--nonbinding-cutoff={}'.format(nonbinding_cutoff), '--out-name={}'.format(output_pairs), '--fasta-name={}'.format(fasta_path)], stdout=DEVNULL, stderr=DEVNULL)
