@@ -118,3 +118,4 @@ if __name__ == "__main__":
     with open(cutoffs.temp_dir / "cutoff_bruteforce.csv", 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerows(csv_rows)
+        
