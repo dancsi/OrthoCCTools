@@ -44,9 +44,11 @@
 
 # Folders
 .vs/
+.vscode/
 build/
 build64/
 build-win/
+build-mingw/
 /src/common/config.h
 /reference
 /data

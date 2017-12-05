@@ -6,11 +6,6 @@
 #include <optional>
 #elif defined(HAVE_EXPERIMENTAL_optional)
 #include <experimental/optional>
-namespace std {
-	template<typename T>
-	using optional = experimental::optional<T>;
-	constexpr auto nullopt = experimental::nullopt;
-}
 #else
 #error "This program needs <optional>"
 #endif
@@ -19,9 +14,6 @@ namespace std {
 #include <string_view>
 #elif defined(HAVE_EXPERIMENTAL_string_view)
 #include <experimental/string_view>
-namespace std {
-	using string_view = experimental::string_view;
-}
 #else
 #error "This program needs <string_view>"
 #endif
@@ -37,7 +29,8 @@ namespace std {
 #include <array>
 #ifdef HAVE_EXPERIMENTAL_array
 #include <experimental/array>
-namespace std {
-	using experimental::make_array;
+namespace std
+{
+using experimental::make_array;
 }
 #endif

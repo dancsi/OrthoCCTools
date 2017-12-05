@@ -10,7 +10,10 @@ set(FASTSCORE_ALL ${FASTSCORE_SOURCES} ${FASTSCORE_HEADERS})
 
 add_executable(fastscore ${FASTSCORE_ALL})
 
-target_link_libraries(fastscore common scoring flags MemoryMapped ${EXTERNAL_LIBRARIES})
+find_package(OpenMP REQUIRED)
+target_compile_options(fastscore PRIVATE ${OpenMP_CXX_FLAGS})
+
+target_link_libraries(fastscore common scoring flags MemoryMapped ${EXTERNAL_LIBRARIES} ${OpenMP_CXX_LIBRARIES})
 target_include_directories(fastscore PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../common/)
 
 install(TARGETS fastscore RUNTIME DESTINATION .)

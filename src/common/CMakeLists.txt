@@ -16,5 +16,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(common ${COMMON_SOURCES} ${COMMON_HEADERS})
 target_link_libraries(common spdlog)
+target_compile_features(common PUBLIC cxx_std_17)
 
 target_include_directories(common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
