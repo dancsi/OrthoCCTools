@@ -83,7 +83,7 @@ struct ScoringHelper {
 	template<typename... Args>
 	ScoringHelper(Args&&... args) : sc(std::forward<Args>(args)...) {}
 
-	aligned_score_t score(std::string_view chain1, std::string_view chain2, const std::vector<alignment_t>& alignment)
+	aligned_score_t score(std::string_view chain1, std::string_view chain2, const std::vector<alignment_t>& alignment, bool truncate)
 	{
 		const auto max_displacement = 7;
 		auto n1 = chain1.length(), n2 = chain2.length();
@@ -94,14 +94,21 @@ struct ScoringHelper {
 		if (buf1.size() < buffer1_size) buf1.resize(buffer1_size, '-');
 		if (buf2.size() < buffer2_size) buf2.resize(buffer2_size, '-');
 
-		//restore padding
-		memset(buf1.data(), '-', max_displacement);
-		memset(buf1.data() + max_displacement + n1, '-', max_displacement);
-		memset(buf2.data(), '-', max_displacement);
-		memset(buf2.data() + max_displacement + n2, '-', max_displacement);
+		if (truncate) {
+			memcpy(buf1.data(), chain1.data(), n1); buf1.resize(n1);
+			memcpy(buf2.data(), chain2.data(), n2); buf2.resize(n2);
+		}
+		else {
+			//restore padding
+			memset(buf1.data(), '-', max_displacement);
+			memset(buf1.data() + max_displacement + n1, '-', max_displacement);
+			memset(buf2.data(), '-', max_displacement);
+			memset(buf2.data() + max_displacement + n2, '-', max_displacement);
 
-		memcpy(buf1.data() + max_displacement, chain1.data(), n1);
-		memcpy(buf2.data() + max_displacement, chain2.data(), n2);
+			memcpy(buf1.data() + max_displacement, chain1.data(), n1);
+			memcpy(buf2.data() + max_displacement, chain2.data(), n2);
+		}
+		
 
 		aligned_score_t best_score{ sc.score(chain1, chain2), 0 };
 
@@ -110,6 +117,9 @@ struct ScoringHelper {
 
 		auto shifting_chain1 = original_chain1;
 		auto shifting_chain2 = original_chain2;
+
+		auto right_truncated_chain1 = original_chain1;
+		auto right_truncated_chain2 = original_chain2;
 
 		alignment_t prev_displacement = 0;
 
@@ -122,8 +132,13 @@ struct ScoringHelper {
 			shifting_chain1.remove_prefix(positions_to_trim);
 			shifting_chain2.remove_prefix(positions_to_trim);
 
-			aligned_score_t left_trimmed_score = { sc.score(original_chain1, shifting_chain2), -displacement };
-			aligned_score_t right_trimmed_score = { sc.score(shifting_chain1, original_chain2), displacement };
+			if (truncate) {
+				right_truncated_chain1.remove_suffix(positions_to_trim);
+				right_truncated_chain2.remove_suffix(positions_to_trim);
+			}
+
+			aligned_score_t left_trimmed_score = { sc.score(right_truncated_chain1, shifting_chain2), -displacement };
+			aligned_score_t right_trimmed_score = { sc.score(shifting_chain1, right_truncated_chain2), displacement };
 
 			if (left_trimmed_score < best_score) best_score = left_trimmed_score;
 			if (right_trimmed_score < best_score) best_score = right_trimmed_score;
@@ -132,18 +147,18 @@ struct ScoringHelper {
 		return best_score;
 	}
 
-	aligned_oriented_score_t score(std::string_view chain1, std::string_view chain2, const std::vector<alignment_t>& alignment, Orientation orientation)
+	aligned_oriented_score_t score(std::string_view chain1, std::string_view chain2, const std::vector<alignment_t>& alignment, bool truncate, Orientation orientation)
 	{
 		static thread_local std::string buf;
 		aligned_oriented_score_t parallel_score, antiparallel_score;
 
 		if (orientation == Orientation::antiparallel || orientation == Orientation::both) {
 			buf.assign(chain2.rbegin(), chain2.rend());
-			antiparallel_score = { score(chain1, buf, alignment), Orientation::antiparallel };
+			antiparallel_score = { score(chain1, buf, alignment, truncate), Orientation::antiparallel };
 		}
 
 		if (orientation == Orientation::parallel || orientation == Orientation::both) {
-			parallel_score = { score(chain1, chain2, alignment), Orientation::parallel };
+			parallel_score = { score(chain1, chain2, alignment, truncate), Orientation::parallel };
 		}
 
 		if (antiparallel_score.score < parallel_score.score) {

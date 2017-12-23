@@ -21,9 +21,18 @@ using OrientationMatrix = SquareMatrix<ScoringOptions::Orientation>;
 using AlignmentMatrix = SquareMatrix<alignment_t>;
 
 template<typename ScoringEngineType>
-void score_pairs(PeptideSet& ps, ScoringEngineType& sc, std::vector<alignment_t>& alignment, ScoringOptions::Orientation orientation, InteractionMatrix& im, OrientationMatrix& om, AlignmentMatrix& am) {
+void score_pairs(
+	PeptideSet& ps,
+	ScoringHelper<ScoringEngineType>& sc,
+	std::vector<alignment_t>& alignment,
+	bool truncate,
+	ScoringOptions::Orientation orientation,
+	InteractionMatrix& im,
+	OrientationMatrix& om,
+	AlignmentMatrix& am
+) {
 	auto n = ps.size();
-	int items_to_process = n*(n + 1) / 2;
+	int items_to_process = n * (n + 1) / 2;
 	int items_processed_total = 0, items_processed_prev = 0;
 	int reporting_interval = items_to_process / 100;
 
@@ -32,7 +41,7 @@ void score_pairs(PeptideSet& ps, ScoringEngineType& sc, std::vector<alignment_t>
 #pragma omp parallel for schedule(dynamic, 4)
 	for (int i = 0; i < n; i++) {
 		for (int j = i; j < n; j++) {
-			auto score = sc.score(ps[i].sequence, ps[j].sequence, alignment, orientation);
+			auto score = sc.score(ps[i].sequence, ps[j].sequence, alignment, truncate, orientation);
 			im[i][j] = im[j][i] = score.score;
 			om[i][j] = om[j][i] = score.orientation;
 			am[i][j] = score.alignment; am[j][i] = -score.alignment;
@@ -79,11 +88,11 @@ int main(int argc, char **argv) {
 	if (score_func == ScoringOptions::ScoreFunc::potapov) {
 		auto weights_path = options.current_executable_path.parent_path() / "scores.dat";
 		ScoringHelper<ScoringEnginePotapov> sc(weights_path.string());
-		score_pairs(ps, sc, alignment, orientation, im, om, am);
+		score_pairs(ps, sc, alignment, truncate, orientation, im, om, am);
 	}
 	else if (score_func == ScoringOptions::ScoreFunc::bcipa) {
 		ScoringHelper<ScoringEngineBCIPA> sc;
-		score_pairs(ps, sc, alignment, orientation, im, om, am);
+		score_pairs(ps, sc, alignment, truncate, orientation, im, om, am);
 	}
 
 	return 0;
