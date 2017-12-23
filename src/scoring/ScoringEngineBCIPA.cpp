@@ -24,6 +24,7 @@ void ScoringEngineBCIPA::init_es_weights() {
 }
 
 void ScoringEngineBCIPA::insert_weights(std::pair<std::string, float> weights_to_insert[], size_t length, weights_t& weights) {
+	weights.fill(0);
 	for (int i = 0; i < length; i++) {
 		auto& p = weights_to_insert[i];
 		weights[detail::residues_hash<2>(p.first)] = p.second;
@@ -71,10 +72,12 @@ float ScoringEngineBCIPA::score(string_view chain1, string_view chain2) /*
 		{
 			if (i + 5 < n2)
 			{
+				if (!isupper(chain2[i + 5])) continue;
 				es_sum += es_score(chain1[i], chain2[i + 5]);
 			}
 			if (i + 5 < n1)
 			{
+				if (!isupper(chain1[i + 5])) continue;
 				es_sum += es_score(chain2[i], chain1[i + 5]);
 			}
 		}

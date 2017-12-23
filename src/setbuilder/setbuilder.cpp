@@ -7,7 +7,7 @@
 #include "common/experimental_cxx_features.h"
 #include "common/PeptideSet.h"
 
-#include "scoring/ScoringEnginePotapov.h";
+#include "scoring/ScoringEnginePotapov.h"
 #include <random>
 
 using namespace std;
