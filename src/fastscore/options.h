@@ -22,8 +22,9 @@ Available options:
     --basename=PATH                 specify output base name
     --max-heptad-displacement=NUM   try shifting the peptides left and right by up to this many heptads
     --alignment=LIST                try these alignments
+    --truncate={0, 1}               truncate the chains when aligning them, false by default
     --orientation={parallel, antiparallel, both}
-    --score-func={potapov, bcipa}   choose scoring function
+    --score-func={potapov, bcipa}   choose scoring function       
 )");
 		exit(1);
 	}
@@ -33,6 +34,7 @@ Available options:
 	std::vector<ScoringOptions::alignment_t> alignment;
 	ScoringOptions::Orientation orientation;
 	ScoringOptions::ScoreFunc score_func;
+	bool truncate;
 
 	void parse_alignment(const std::string& alignment_str) {
 		std::istringstream ss(alignment_str);
@@ -79,6 +81,8 @@ Available options:
 			}
 		}
 
+		truncate = args.get<bool>("truncate", false);
+
 		string orientation_str = args.get<string>("orientation", "parallel");
 		char first_char = std::toupper(orientation_str[0]);
 		switch (first_char) {
@@ -110,8 +114,10 @@ Available options:
 		cerr << "Fasta path is " << fasta_path.string() << endl;
 		cerr << "Output basename is " << basename << endl;
 
-		cerr << "Considered alignments (absolute values)\n  ";
-		for (auto x : alignment) cerr << x << " ";
+		cerr << "Will test the following alignments:  ";
+		for_each(alignment.rbegin(), alignment.rend(), [&](int a) {cerr << -a << " "; });
+		bool skip_zero = (alignment[0] == 0);
+		for_each(alignment.begin() + (skip_zero?1:0), alignment.end(), [&](int a) {cerr << a << " "; });
 		cerr << endl;
 
 		cerr << "Considered orientations are " << [](ScoringOptions::Orientation o) {
