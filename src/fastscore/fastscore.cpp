@@ -64,6 +64,7 @@ int main(int argc, char **argv) {
 	options.print_parsed();
 
 	auto& alignment = options.alignment;
+	auto truncate = options.truncate;
 	auto orientation = options.orientation;
 
 	auto fasta_path = options.fasta_path.string();

@@ -109,18 +109,18 @@ Available options:
 	}
 
 	void print_parsed() {
-		using std::cerr;
+		using std::cout;
 		using std::endl;
-		cerr << "Fasta path is " << fasta_path.string() << endl;
-		cerr << "Output basename is " << basename << endl;
+		cout << "Fasta path is " << fasta_path.string() << endl;
+		cout << "Output basename is " << basename << endl;
 
-		cerr << "Will test the following alignments:  ";
-		for_each(alignment.rbegin(), alignment.rend(), [&](int a) {cerr << -a << " "; });
+		cout << "Will test the following alignments:  ";
+		for_each(alignment.rbegin(), alignment.rend(), [&](int a) {cout << -a << " "; });
 		bool skip_zero = (alignment[0] == 0);
-		for_each(alignment.begin() + (skip_zero?1:0), alignment.end(), [&](int a) {cerr << a << " "; });
-		cerr << endl;
+		for_each(alignment.begin() + (skip_zero?1:0), alignment.end(), [&](int a) {cout << a << " "; });
+		cout << endl;
 
-		cerr << "Considered orientations are " << [](ScoringOptions::Orientation o) {
+		cout << "Considered orientations are " << [](ScoringOptions::Orientation o) {
 			switch (o) {
 			case ScoringOptions::Orientation::parallel:
 				return "parallel";
@@ -133,7 +133,9 @@ Available options:
 			}
 		}(orientation) << endl;
 
-		cerr << "Used scoring function is " << [](ScoringOptions::ScoreFunc sfunc) {
+		cout << "Chains are " << (truncate ? "" : "not ") << "truncated\n";
+
+		cout << "Used scoring function is " << [](ScoringOptions::ScoreFunc sfunc) {
 			switch (sfunc) {
 			case ScoringOptions::ScoreFunc::potapov:
 				return "potapov";
