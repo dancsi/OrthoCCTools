@@ -64,10 +64,14 @@ Available options:
 			exit(1);
 		}
 
-		basename = args.get<string>("basename", (fasta_path.parent_path() / fasta_path.stem()).string());
+		basename = args.get<string>(
+			"basename", 
+			args.get<string>("out-name", 
+							(fasta_path.parent_path() / fasta_path.stem()).string()));
 
 		int max_heptad_displacement = args.get<int>("max-heptad-displacement", 0);
 		auto alignment_str = args.get<string>("alignment");
+		if(!alignment_str) alignment_str = args.get<string>("align");
 		if (alignment_str) {
 			if (max_heptad_displacement != 0) {
 				std::cout << "alignment and max_heptad_displacement can not be specified at the same time\n";
