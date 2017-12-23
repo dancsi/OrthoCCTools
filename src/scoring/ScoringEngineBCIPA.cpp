@@ -8,7 +8,7 @@ ScoringEngineBCIPA::ScoringEngineBCIPA() {
 }
 
 template<typename T, size_t N>
-size_t array_length(T(&)[N])
+inline size_t array_length(T(&)[N])
 {
 	return N;
 }

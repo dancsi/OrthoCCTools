@@ -19,12 +19,12 @@ struct Options {
 		puts(R"(
 USAGE: fastscore INPUT [OPTIONS...]
 Available options:
-    --basename=PATH                 specify output base name
-    --max-heptad-displacement=NUM   try shifting the peptides left and right by up to this many heptads
-    --alignment=LIST                try these alignments
-    --truncate={0, 1}               truncate the chains when aligning them, false by default
+    --basename=PATH                        specify output base name
+    --max-heptad-displacement=NUM          try shifting the peptides left and right by up to this many heptads
+    --alignment=LIST                       try these alignments
+    --truncate={0, 1}                      truncate the chains when aligning them, false by default
     --orientation={parallel, antiparallel, both}
-    --score-func={potapov, bcipa}   choose scoring function       
+    --score-func={potapov, bcipa, qcipa}   choose scoring function       
 )");
 		exit(1);
 	}
@@ -102,6 +102,9 @@ Available options:
 		}
 		else if (score_func_str == "bcipa") {
 			score_func = ScoringOptions::ScoreFunc::bcipa;
+		}
+		else if (score_func_str == "qcipa") {
+			score_func = ScoringOptions::ScoreFunc::qcipa;
 		}
 		else {
 			print_usage_and_exit();
