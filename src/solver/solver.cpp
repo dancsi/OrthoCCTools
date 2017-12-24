@@ -70,7 +70,7 @@ struct ProgressReporter
 {
 	static string cmdline;
 	static void set_cmdline(int argc, char** argv) {
-		cmdline.clear();
+		cmdline = "#";
 		for (int i = 0; i < argc; i++) {
 			cmdline += argv[i] + " "s;
 		}
