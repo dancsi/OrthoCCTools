@@ -25,7 +25,7 @@ float ScoringEngineQCIPA::score(string_view chain1, string_view chain2) /*
 	auto n = std::min(n1, n2);
 
 	int n_pairs = 0;
-	float hp_sum = 0, a_sum = 0, ge_sum;
+	float hp_sum = 0, a_sum = 0, ge_sum = 0;
 
 	for (int i = 0; i < n; i++)
 		//fgabcde register
