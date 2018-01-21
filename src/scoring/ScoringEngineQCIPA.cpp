@@ -4,12 +4,32 @@
 #include <cctype>
 
 ScoringEngineQCIPA::ScoringEngineQCIPA() {
+	init_c_weights();
+	init_es_weights();
 }
 
 template<typename T, size_t N>
 inline size_t array_length(T(&)[N])
 {
 	return N;
+}
+
+void ScoringEngineQCIPA::init_c_weights() {
+	std::pair<std::string, float> weights_to_insert[] = { {"II", -1.75}, {"IN", 11.78}, {"NI", 11.78}, {"NN", -5.24} };
+	insert_weights(weights_to_insert, array_length(weights_to_insert), c_scores);
+}
+
+void ScoringEngineQCIPA::init_es_weights() {
+	std::pair<std::string, float> weights_to_insert[] = { {"EE", -11.3}, {"EK", -0.97}, {"KE", -0.97}, {"KK", -76.22} };
+	insert_weights(weights_to_insert, array_length(weights_to_insert), es_scores);
+}
+
+void ScoringEngineQCIPA::insert_weights(std::pair<std::string, float> weights_to_insert[], size_t length, weights_t& weights) {
+	weights.fill(0);
+	for (int i = 0; i < length; i++) {
+		auto& p = weights_to_insert[i];
+		weights[detail::residues_hash<2>(p.first)] = p.second;
+	}
 }
 
 float ScoringEngineQCIPA::score(string_view chain1, string_view chain2) /*
@@ -25,7 +45,7 @@ float ScoringEngineQCIPA::score(string_view chain1, string_view chain2) /*
 	auto n = std::min(n1, n2);
 
 	int n_pairs = 0;
-	float hp_sum = 0, a_sum = 0, ge_sum = 0;
+	float hp_sum = 0.f, es_sum = 0.f, c_sum = 0.f;
 
 	for (int i = 0; i < n; i++)
 		//fgabcde register
@@ -43,22 +63,9 @@ float ScoringEngineQCIPA::score(string_view chain1, string_view chain2) /*
 		}
 
 		/* core contribution */
-		if (reg == 2)  //sites a, a'
+		if (reg == 2)  //a,a' sites
 		{
-			char c1 = chain1[i];
-			char c2 = chain2[i];
-			if (c1 > c2) std::swap(c1, c2);
-			if (c1 == 'I') {
-				if (c2 == 'I') {
-					a_sum += -1.75;
-				}
-				else if (c2 == 'N') {
-					a_sum += 11.78;
-				}
-			}
-			else if (c1 == 'N' && c2 == 'N') {
-				a_sum += -5.24;
-			}
+			c_sum += c_score(chain1[i], chain2[i]);
 		}
 
 		/* electrostatic contribution */
@@ -67,17 +74,17 @@ float ScoringEngineQCIPA::score(string_view chain1, string_view chain2) /*
 			if (i + 5 < n2)
 			{
 				if (!isupper(chain2[i + 5])) continue;
-				ge_sum += ge_score(chain1[i], chain2[i + 5]);
+				es_sum += es_score(chain1[i], chain2[i + 5]);
 			}
 			if (i + 5 < n1)
 			{
 				if (!isupper(chain1[i + 5])) continue;
-				ge_sum += ge_score(chain2[i], chain1[i + 5]);
+				es_sum += es_score(chain2[i], chain1[i + 5]);
 			}
 		}
 	}
 
-	return -(4.16 * hp_sum / n_pairs + a_sum + ge_sum + 30.18);
+	return -(4.16 * hp_sum / n_pairs + c_sum + es_sum + 30.18);
 }
 
 float ScoringEngineQCIPA::hp_score(const char c) {
@@ -86,21 +93,18 @@ float ScoringEngineQCIPA::hp_score(const char c) {
 	return scores[detail::residue_code(c)];
 }
 
-float ScoringEngineQCIPA::ge_score(char c1, char c2)
-{
-	float ret = 0;
-	if (c1 > c2) std::swap(c1, c2);
-	if (c1 == 'E') {
-		if (c2 == 'E') {
-			ret += -11.3;
-		}
-		else if (c2 == 'K') {
-			ret += -0.97;
-		}
-	}
-	else if (c1 == 'K' && c2 == 'K') {
-		ret += -76.22;
-	}
+float ScoringEngineQCIPA::c_score(const char c1, const char c2) {
+	return generic_pair_score(c1, c2, c_scores);
+}
 
-	return ret;
+float ScoringEngineQCIPA::es_score(const char c1, const char c2) {
+	return generic_pair_score(c1, c2, es_scores);
+}
+
+inline float ScoringEngineQCIPA::generic_pair_score(const char c1, const char c2, weights_t& weights) {
+	char buf[2];
+	buf[0] = c1;
+	buf[1] = c2;
+
+	return weights[detail::residues_hash<2>({ buf, 2 })];
 }
