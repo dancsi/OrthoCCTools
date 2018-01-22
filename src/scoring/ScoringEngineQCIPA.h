@@ -1,23 +1,29 @@
 #pragma once
 
-#include "ScoringHelper.h"
+#include "CIPAHelper.h"
 
-struct ScoringEngineQCIPA {
-	using string_view = std::string_view;
+#include <array>
+#include <string_view>
+#include <utility>
 
-	using weights_t = std::array<float, 20 * 20>;
-	weights_t c_scores, es_scores;
+using namespace std::literals;
 
-	ScoringEngineQCIPA();
-	void init_c_weights();
-	void init_es_weights();
-	void insert_weights(std::pair<std::string, float> weights_to_insert[], size_t length, weights_t& weights);
+struct QCIPAImpl {
+	constexpr static std::pair<std::string_view, float> c_weights[] = {
+		{ "II"sv, -1.75 },{ "IN"sv, 11.78 },{ "NI"sv, 11.78 },{ "NN"sv, -5.24 }
+	};
 
-	float score(string_view chain1, string_view chain2);
+	constexpr static std::pair<std::string_view, float> es_weights[] = {
+		{ "EE"sv, -11.3 },{ "EK"sv, -0.97 },{ "KE"sv, -0.97 },{ "KK"sv, -76.22 } 
+	};
 
-	float hp_score(const char c);
-	float c_score(const char c1, const char c2);
-	float es_score(const char c1, const char c2);
+	constexpr static bool core_position_filter(int reg) {
+		return (reg == 2);
+	}
 
-	float generic_pair_score(const char c1, const char c2, weights_t& weights);
+	constexpr static float calculate_score(float avg_hp_sum, float c_sum, float es_sum) {
+		return (4.16 * avg_hp_sum + c_sum + es_sum + 30.18);
+	}
 };
+
+using ScoringEngineQCIPA = CIPAHelper<QCIPAImpl>;

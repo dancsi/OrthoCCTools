@@ -1,23 +1,43 @@
 #pragma once
 
-#include "ScoringHelper.h"
+#include "CIPAHelper.h"
 
-struct ScoringEngineBCIPA {
-	using string_view = std::string_view;
+#include <array>
+#include <string_view>
+#include <utility>
 
-	using weights_t = std::array<float, 20 * 20>;
-	weights_t c_scores, es_scores;
+using namespace std::literals;
 
-	ScoringEngineBCIPA();
-	void init_c_weights();
-	void init_es_weights();
-	void insert_weights(std::pair<std::string, float> weights_to_insert[], size_t length, weights_t& weights);
+struct BCIPAImpl {
+	constexpr static std::pair<std::string_view, float> c_weights[] = {
+		{ "II"sv, -1.5 },{ "LL"sv, -1.5 },{ "VI"sv, -1.5 },{ "IV"sv, -1.5 },
+		{ "VV"sv, -1.0 },{ "VL"sv, -1.0 },{ "IL"sv, -1.0 },{ "IR"sv, -1.0 },
+		{ "IK"sv, -1.0 },{ "LV"sv, -1.0 },{ "LI"sv, -1.0 },{ "RI"sv, -1.0 },
+		{ "KI"sv, -1.0 },{ "IA"sv, -0.5 },{ "LA"sv, -0.5 },{ "VA"sv, -0.5 },
+		{ "NN"sv, -0.5 },{ "IN"sv, -0.5 },{ "IT"sv, -0.5 },{ "LK"sv, -0.5 },
+		{ "LT"sv, -0.5 },{ "RR"sv, -0.5 },{ "AI"sv, -0.5 },{ "AL"sv, -0.5 },
+		{ "AV"sv, -0.5 },{ "NI"sv, -0.5 },{ "TI"sv, -0.5 },{ "KL"sv, -0.5 },
+		{ "TL"sv, -0.5 },{ "VT"sv, +0.5 },{ "TV"sv, +0.5 } 
+	};
 
-	float score(string_view chain1, string_view chain2);
+	constexpr static std::pair<std::string_view, float> es_weights[] = { 
+		{ "RE"sv, -2.0 },{ "ER"sv, -2.0 },{ "KE"sv, -1.5 },{ "KQ"sv, -1.5 },
+		{ "RQ"sv, -1.5 },{ "QQ"sv, -1.5 },{ "EK"sv, -1.5 },{ "QK"sv, -1.5 },
+		{ "QR"sv, -1.5 },{ "QE"sv, -1.0 },{ "EQ"sv, -1.0 },{ "QA"sv, -0.5 },
+		{ "RA"sv, -0.5 },{ "KD"sv, -0.5 },{ "RD"sv, -0.5 },{ "KL"sv, -0.5 },
+		{ "TL"sv, -0.5 },{ "RK"sv, -0.5 },{ "AQ"sv, -0.5 },{ "AR"sv, -0.5 },
+		{ "DK"sv, -0.5 },{ "DR"sv, -0.5 },{ "LK"sv, -0.5 },{ "LT"sv, -0.5 },
+		{ "KR"sv, -0.5 },{ "EE"sv, +0.5 },{ "KK"sv, +0.5 },{ "RR"sv, +0.5 },
+		{ "DD"sv, +1.0 },{ "DE"sv, +1.0 },{ "TR"sv, +1.0 },{ "ED"sv, +1.0 },
+		{ "RT"sv, +1.0 } };
 
-	float hp_score(const char c);
-	float c_score(const char c1, const char c2);
-	float es_score(const char c1, const char c2);
+	constexpr static bool core_position_filter(int reg) {
+		return (reg == 2) || (reg == 5);
+	}
 
-	float generic_pair_score(const char c1, const char c2, weights_t& weights);
+	constexpr static float calculate_score(float avg_hp_sum, float c_sum, float es_sum) {
+		return (81.3256f * avg_hp_sum - 10.5716f * c_sum - 4.7771f * es_sum - 29.1320f - 273);
+	}
 };
+
+using ScoringEngineBCIPA = CIPAHelper<BCIPAImpl>;
