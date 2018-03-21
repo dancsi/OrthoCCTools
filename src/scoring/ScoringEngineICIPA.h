@@ -66,7 +66,7 @@ struct ICIPA_nter_core_impl {
 			+ scores.es_sum
 			+ 2.257456 * scores.num_LL_on_d
 			+ -0.282358 * scores.charge_prod
-			+ scores.cv_sum;
+			+ scores.nterm_c;
 	}
 };
 
