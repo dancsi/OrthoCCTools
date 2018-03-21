@@ -11,6 +11,7 @@
 
 #include "scoring/ScoringEngineBCIPA.h"
 #include "scoring/ScoringEngineQCIPA.h"
+#include "scoring/ScoringEngineICIPA.h"
 #include "scoring/ScoringEnginePotapov.h"
 
 namespace py = pybind11;
@@ -49,8 +50,12 @@ PYBIND11_MODULE(pyccscore, m)
 	auto potapov = std::make_shared<ScoringHelper<ScoringEnginePotapov>>("scores.dat");
 	auto bcipa = std::make_shared<ScoringHelper<ScoringEngineBCIPA>>();
 	auto qcipa = std::make_shared<ScoringHelper<ScoringEngineQCIPA>>();
+	auto icipa_core_vert = std::make_shared<ScoringHelper<ScoringEngineICIPACoreVert>>();
+	auto icipa_nter_core = std::make_shared<ScoringHelper<ScoringEngineICIPANterCore>>();
 
 	register_scoring_engine(m, potapov, "score_potapov");
 	register_scoring_engine(m, bcipa, "score_bcipa");
 	register_scoring_engine(m, qcipa, "score_qcipa");
+	register_scoring_engine(m, icipa_core_vert, "icipa_core_vert");
+	register_scoring_engine(m, icipa_nter_core, "icipa_nter_core");
 }

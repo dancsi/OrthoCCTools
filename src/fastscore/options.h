@@ -24,7 +24,8 @@ Available options:
     --alignment=LIST                       try these alignments
     --truncate={0, 1}                      truncate the chains when aligning them, false by default
     --orientation={parallel, antiparallel, both}
-    --score-func={potapov, bcipa, qcipa}   choose scoring function       
+    --score-func={potapov, bcipa, qcipa	   choose scoring function
+				  icipa_core_vert, icipa_nter_core}          
 )");
 		exit(1);
 	}
@@ -110,6 +111,12 @@ Available options:
 		else if (score_func_str == "qcipa") {
 			score_func = ScoringOptions::ScoreFunc::qcipa;
 		}
+		else if (score_func_str == "icipa_core_vert") {
+			score_func = ScoringOptions::ScoreFunc::icipa_core_vert;
+		}
+		else if (score_func_str == "icipa_nter_core") {
+			score_func = ScoringOptions::ScoreFunc::icipa_nter_core;
+		}
 		else {
 			print_usage_and_exit();
 		}
@@ -148,6 +155,12 @@ Available options:
 				return "potapov";
 			case ScoringOptions::ScoreFunc::bcipa:
 				return "bcipa";
+			case ScoringOptions::ScoreFunc::qcipa:
+				return "qcipa";
+			case ScoringOptions::ScoreFunc::icipa_core_vert:
+				return "icipa_core_vert";
+			case ScoringOptions::ScoreFunc::icipa_nter_core:
+				return "icipa_nter_core";
 			default:
 				return "invalid";
 			}

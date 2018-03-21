@@ -67,7 +67,7 @@ namespace ScoringOptions {
 		{}
 	};
 
-	enum class ScoreFunc { potapov, bcipa, qcipa };
+	enum class ScoreFunc { potapov, bcipa, qcipa, icipa_core_vert, icipa_nter_core };
 }
 
 template<typename ScoringEngine>

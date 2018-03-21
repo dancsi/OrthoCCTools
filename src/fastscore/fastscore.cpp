@@ -10,6 +10,7 @@
 #include "scoring/ScoringEnginePotapov.h"
 #include "scoring/ScoringEngineBCIPA.h"
 #include "scoring/ScoringEngineQCIPA.h"
+#include "scoring/ScoringEngineICIPA.h"
 
 #include "common/PeptideSet.h"
 #include "common/SpecialMatrices.h"
@@ -97,6 +98,14 @@ int main(int argc, char **argv) {
 	}
 	else if (score_func == ScoringOptions::ScoreFunc::qcipa) {
 		ScoringHelper<ScoringEngineQCIPA> sc;
+		score_pairs(ps, sc, alignment, truncate, orientation, im, om, am);
+	}
+	else if (score_func == ScoringOptions::ScoreFunc::icipa_core_vert) {
+		ScoringHelper<ScoringEngineICIPACoreVert> sc;
+		score_pairs(ps, sc, alignment, truncate, orientation, im, om, am);
+	}
+	else if (score_func == ScoringOptions::ScoreFunc::icipa_nter_core) {
+		ScoringHelper<ScoringEngineICIPANterCore> sc;
 		score_pairs(ps, sc, alignment, truncate, orientation, im, om, am);
 	}
 
