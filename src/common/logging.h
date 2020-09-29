@@ -3,7 +3,7 @@
 #include <utility>
 
 #include "spdlog/spdlog.h"
-#include "spdlog/fmt/ostr.h"
+#include "spdlog/sinks/stdout_sinks.h"
 
 namespace logging {
 	using console_logger_t = std::shared_ptr<spdlog::logger>;

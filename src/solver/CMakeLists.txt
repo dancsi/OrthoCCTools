@@ -14,6 +14,6 @@ set(SOLVER_ALL ${SOLVER_SOURCES} ${SOLVER_HEADERS})
 add_subdirectory(mcqd_para)
 
 add_executable(solver ${SOLVER_ALL})
-target_link_libraries(solver common spdlog flags MemoryMapped mcqd_para ${EXTERNAL_LIBRARIES})
+target_link_libraries(solver common flags MemoryMapped mcqd_para ${EXTERNAL_LIBRARIES})
 
 install(TARGETS solver RUNTIME DESTINATION .)

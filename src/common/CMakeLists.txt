@@ -11,6 +11,6 @@ set(COMMON_HEADERS
 )
 
 add_library(common ${COMMON_SOURCES} ${COMMON_HEADERS})
-target_link_libraries(common spdlog)
+target_link_libraries(common spdlog::spdlog)
 
 target_include_directories(common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

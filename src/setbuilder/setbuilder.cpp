@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include "flags/flags.h"
+#include "flags.h"
 
 #include "common/PeptideSet.h"
 
