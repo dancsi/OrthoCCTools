@@ -2,8 +2,6 @@
 #include <atomic>
 #include <chrono>
 
-#include "common/experimental_cxx_features.h"
-
 #include "options.h"
 
 #include "scoring/ScoringHelper.h"
@@ -16,7 +14,7 @@
 #include "common/SpecialMatrices.h"
 
 using namespace std;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 using ScoringOptions::alignment_t;
 using OrientationMatrix = SquareMatrix<ScoringOptions::Orientation>;

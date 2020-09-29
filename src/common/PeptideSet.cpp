@@ -1,6 +1,6 @@
 #include "PeptideSet.h"
 
-void PeptideSet::read(std::experimental::filesystem::path path)
+void PeptideSet::read(std::filesystem::path path)
 {
 	std::ifstream input(path.string());
 

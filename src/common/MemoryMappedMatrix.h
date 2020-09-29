@@ -8,8 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "experimental_cxx_features.h"
-
 #include "MemoryMapped.h"
 
 struct FileHeader

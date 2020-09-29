@@ -17,5 +17,9 @@ set(HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/Timer.h
 )
 
+find_package(Threads)
+
 add_library(mcqd_para ${SOURCES} ${HEADERS})
+target_link_libraries(mcqd_para Threads::Threads)
+
 target_include_directories(mcqd_para PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

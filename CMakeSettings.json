@@ -1,37 +1,28 @@
-{
-  // See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.
+﻿{
   "configurations": [
     {
-      "name": "x86-Debug",
-      "generator": "Visual Studio 15 2017",
-      "configurationType": "Debug",
-      "buildRoot": "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "cmakeCommandArgs": "-DADDITIONAL_INCLUDES:PATH=${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "buildCommandArgs": "-m -v:minimal"
-    },
-    {
-      "name": "x86-Release",
-      "generator": "Visual Studio 15 2017",
-      "configurationType": "RelWithDebInfo",
-      "buildRoot": "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "cmakeCommandArgs": "-DADDITIONAL_INCLUDES:PATH=${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "buildCommandArgs": "-m -v:minimal"
-    },
-    {
       "name": "x64-Debug",
-      "generator": "Visual Studio 15 2017 Win64",
+      "generator": "Ninja",
       "configurationType": "Debug",
-      "buildRoot": "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "cmakeCommandArgs": "-DADDITIONAL_INCLUDES:PATH=${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "buildCommandArgs": "-m -v:minimal"
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "variables": []
     },
     {
       "name": "x64-Release",
-      "generator": "Visual Studio 15 2017 Win64",
+      "generator": "Ninja",
       "configurationType": "RelWithDebInfo",
-      "buildRoot": "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "cmakeCommandArgs": "-DADDITIONAL_INCLUDES:PATH=${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-      "buildCommandArgs": "-m -v:minimal"
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": []
     }
   ]
 }

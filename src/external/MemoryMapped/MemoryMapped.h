@@ -13,7 +13,7 @@ typedef unsigned __int64 uint64_t;
 #include <stdint.h>
 #endif
 
-#include "common/experimental_cxx_features.h"
+#include <stdexcept>
 #include <string>
 
 /// Portable read-only memory mapping (Windows and Linux)

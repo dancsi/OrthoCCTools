@@ -1,7 +1,6 @@
 #pragma once
 
-#include "experimental_cxx_features.h"
-
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -40,11 +39,11 @@ class PeptideSet : public std::vector<Peptide>
 
 public:
 	PeptideSet() {}
-	PeptideSet(std::experimental::filesystem::path path)
+	PeptideSet(std::filesystem::path path)
 	{
 		read(path);
 	}
 
-	void read(std::experimental::filesystem::path path);
+	void read(std::filesystem::path path);
 	void write(std::string_view path);
 };

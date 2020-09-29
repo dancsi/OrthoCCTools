@@ -31,40 +31,8 @@
 
 #ifdef _MSC_VER
 #include <intrin.h>
-static uint32_t __inline __builtin_clz(uint32_t x) {
-	unsigned long r = 0;
-	_BitScanReverse(&r, x);
-	return (31 - r);
-}
-uint32_t __inline __builtin_ctz(uint32_t value)
-{
-	unsigned long trailing_zero = 0;
-
-	if (_BitScanForward(&trailing_zero, value))
-	{
-		return trailing_zero;
-	}
-	else
-	{
-		return 32;
-	}
-}
 
 uint32_t __inline __builtin_ctzl(uint64_t value)
-{
-	unsigned long trailing_zero = 0;
-
-	if (_BitScanForward64(&trailing_zero, value))
-	{
-		return trailing_zero;
-	}
-	else
-	{
-		return 32;
-	}
-}
-
-uint32_t __inline __builtin_ctzll(uint64_t value)
 {
 	unsigned long trailing_zero = 0;
 
@@ -167,7 +135,7 @@ template<class Int>
 unsigned int countTrailing0(Int v) {
     if (sizeof(Int) < sizeof(int)) {return countTrailing0<int>(v);}
     if (sizeof(Int) == sizeof(int)) return __builtin_ctz(v);
-    if (sizeof(Int) == sizeof(long int)) return __builtin_ctzl(v);
+    if (sizeof(Int) == sizeof(long int)) return __builtin_ctzll(v);
     if (sizeof(Int) >= sizeof(long long int)) return __builtin_ctzll(v);
 }
 

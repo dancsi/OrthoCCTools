@@ -4,8 +4,6 @@
 #include <map>
 #include <vector>
 
-#include "common/experimental_cxx_features.h"
-
 #include "ScoringHelper.h"
 
 struct ScoringEnginePotapov {

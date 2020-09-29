@@ -10,7 +10,6 @@
 #include <cmath>
 
 #include "common/SpecialMatrices.h"
-#include "common/experimental_cxx_features.h"
 
 #include "mcqd_para/MaximumCliqueBase.h"
 #include "mcqd_para/ParallelMaximumClique.h"

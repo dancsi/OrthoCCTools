@@ -1,45 +1,15 @@
 #ifndef FLAGS_H_
 #define FLAGS_H_
 
-#include "../../common/experimental_cxx_features.h"
-
 #include <algorithm>
 #include <array>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#ifdef _MSC_VER
-namespace std {
-	namespace details {
-		template<class> struct is_ref_wrapper : std::false_type {};
-		template<class T> struct is_ref_wrapper<std::reference_wrapper<T>> : std::true_type {};
-
-		template<class T>
-		using not_ref_wrapper = std::negation<is_ref_wrapper<std::decay_t<T>>>;
-
-		template <class D, class...> struct return_type_helper { using type = D; };
-		template <class... Types>
-		struct return_type_helper<void, Types...> : std::common_type<Types...> {
-			static_assert(std::conjunction_v<not_ref_wrapper<Types>...>,
-				"Types cannot contain reference_wrappers when D is void");
-		};
-
-		template <class D, class... Types>
-		using return_type = std::array<typename return_type_helper<D, Types...>::type,
-			sizeof...(Types)>;
-	}
-
-	template < class D = void, class... Types>
-	constexpr details::return_type<D, Types...> make_array(Types&&... t) {
-		return { std::forward<Types>(t)... };
-	}
-}
-#endif
-
 namespace flags {
-using std::make_array;
 using std::nullopt;
 using std::optional;
 using std::string_view;
@@ -149,7 +119,7 @@ optional<std::string> get(const argument_map& options,
 // Special case for booleans: if the value is any of the below, the option will
 // be considered falsy. Otherwise, it will be considered truthy just for being
 // present.
-constexpr auto falsities = make_array("0", "n", "no", "f", "false");
+constexpr std::array falsities{ "0", "n", "no", "f", "false" };
 template <>
 optional<bool> get(const argument_map& options, const string_view& option) {
   if (const auto value = get_value(options, option)) {

@@ -2,8 +2,6 @@
 
 #include <utility>
 
-#include "experimental_cxx_features.h"
-
 #include "spdlog/spdlog.h"
 #include "spdlog/fmt/ostr.h"
 

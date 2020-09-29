@@ -1,8 +1,7 @@
 #include "ScoringEnginePotapov.h"
 
-#include "common/experimental_cxx_features.h"
-
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <limits>
 #include <string>
@@ -11,7 +10,7 @@ using std::string_view;
 
 ScoringEnginePotapov::ScoringEnginePotapov(string_view weights_path, int max_peptide_length) : max_peptide_length(max_peptide_length)
 {
-	using namespace std::experimental::filesystem;
+	using namespace std::filesystem;
 	using namespace std::string_literals;
 
 	path path(weights_path.data());

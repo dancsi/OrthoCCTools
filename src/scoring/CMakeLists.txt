@@ -20,5 +20,6 @@ add_library(scoring ${SCORING_ALL})
 
 target_include_directories(scoring PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../common/)
 target_link_libraries(scoring common ${EXTERNAL_LIBRARIES})
+set_target_properties(scoring PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/scores.dat DESTINATION .)
