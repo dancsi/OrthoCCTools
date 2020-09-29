@@ -11,8 +11,8 @@
 
 #include "class.h"
 
-NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
-NAMESPACE_BEGIN(detail)
+PYBIND11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
+PYBIND11_NAMESPACE_BEGIN(detail)
 
 template <>
 class type_caster<value_and_holder> {
@@ -24,13 +24,13 @@ public:
 
     template <typename> using cast_op_type = value_and_holder &;
     operator value_and_holder &() { return *value; }
-    static PYBIND11_DESCR name() { return type_descr(_<value_and_holder>()); }
+    static constexpr auto name = _<value_and_holder>();
 
 private:
     value_and_holder *value = nullptr;
 };
 
-NAMESPACE_BEGIN(initimpl)
+PYBIND11_NAMESPACE_BEGIN(initimpl)
 
 inline void no_nullptr(void *ptr) {
     if (!ptr) throw type_error("pybind11::init(): factory function returned nullptr");
@@ -51,6 +51,16 @@ bool is_alias(Cpp<Class> *ptr) {
 // Failing fallback version of the above for a no-alias class (always returns false)
 template <typename /*Class*/>
 constexpr bool is_alias(void *) { return false; }
+
+// Constructs and returns a new object; if the given arguments don't map to a constructor, we fall
+// back to brace aggregate initiailization so that for aggregate initialization can be used with
+// py::init, e.g.  `py::init<int, int>` to initialize a `struct T { int a; int b; }`.  For
+// non-aggregate types, we need to use an ordinary T(...) constructor (invoking as `T{...}` usually
+// works, but will not do the expected thing when `T` has an `initializer_list<T>` constructor).
+template <typename Class, typename... Args, detail::enable_if_t<std::is_constructible<Class, Args...>::value, int> = 0>
+inline Class *construct_or_initialize(Args &&...args) { return new Class(std::forward<Args>(args)...); }
+template <typename Class, typename... Args, detail::enable_if_t<!std::is_constructible<Class, Args...>::value, int> = 0>
+inline Class *construct_or_initialize(Args &&...args) { return new Class{std::forward<Args>(args)...}; }
 
 // Attempts to constructs an alias using a `Alias(Cpp &&)` constructor.  This allows types with
 // an alias to provide only a single Cpp factory function as long as the Alias can be
@@ -122,6 +132,7 @@ void construct(value_and_holder &v_h, Alias<Class> *alias_ptr, bool) {
 template <typename Class>
 void construct(value_and_holder &v_h, Holder<Class> holder, bool need_alias) {
     auto *ptr = holder_helper<Holder<Class>>::get(holder);
+    no_nullptr(ptr);
     // If we need an alias, check that the held pointer is actually an alias instance
     if (Class::has_alias && need_alias && !is_alias<Class>(ptr))
         throw type_error("pybind11::init(): construction failed: returned holder-wrapped instance "
@@ -161,7 +172,7 @@ struct constructor {
     template <typename Class, typename... Extra, enable_if_t<!Class::has_alias, int> = 0>
     static void execute(Class &cl, const Extra&... extra) {
         cl.def("__init__", [](value_and_holder &v_h, Args... args) {
-            v_h.value_ptr() = new Cpp<Class>{std::forward<Args>(args)...};
+            v_h.value_ptr() = construct_or_initialize<Cpp<Class>>(std::forward<Args>(args)...);
         }, is_new_style_constructor(), extra...);
     }
 
@@ -171,9 +182,9 @@ struct constructor {
     static void execute(Class &cl, const Extra&... extra) {
         cl.def("__init__", [](value_and_holder &v_h, Args... args) {
             if (Py_TYPE(v_h.inst) == v_h.type->type)
-                v_h.value_ptr() = new Cpp<Class>{std::forward<Args>(args)...};
+                v_h.value_ptr() = construct_or_initialize<Cpp<Class>>(std::forward<Args>(args)...);
             else
-                v_h.value_ptr() = new Alias<Class>{std::forward<Args>(args)...};
+                v_h.value_ptr() = construct_or_initialize<Alias<Class>>(std::forward<Args>(args)...);
         }, is_new_style_constructor(), extra...);
     }
 
@@ -182,7 +193,7 @@ struct constructor {
                           !std::is_constructible<Cpp<Class>, Args...>::value, int> = 0>
     static void execute(Class &cl, const Extra&... extra) {
         cl.def("__init__", [](value_and_holder &v_h, Args... args) {
-            v_h.value_ptr() = new Alias<Class>{std::forward<Args>(args)...};
+            v_h.value_ptr() = construct_or_initialize<Alias<Class>>(std::forward<Args>(args)...);
         }, is_new_style_constructor(), extra...);
     }
 };
@@ -193,7 +204,7 @@ template <typename... Args> struct alias_constructor {
               enable_if_t<Class::has_alias && std::is_constructible<Alias<Class>, Args...>::value, int> = 0>
     static void execute(Class &cl, const Extra&... extra) {
         cl.def("__init__", [](value_and_holder &v_h, Args... args) {
-            v_h.value_ptr() = new Alias<Class>{std::forward<Args>(args)...};
+            v_h.value_ptr() = construct_or_initialize<Alias<Class>>(std::forward<Args>(args)...);
         }, is_new_style_constructor(), extra...);
     }
 };
@@ -320,6 +331,6 @@ struct pickle_factory<Get, Set, RetState(Self), NewInstance(ArgState)> {
     }
 };
 
-NAMESPACE_END(initimpl)
-NAMESPACE_END(detail)
-NAMESPACE_END(pybind11)
+PYBIND11_NAMESPACE_END(initimpl)
+PYBIND11_NAMESPACE_END(detail)
+PYBIND11_NAMESPACE_END(pybind11)

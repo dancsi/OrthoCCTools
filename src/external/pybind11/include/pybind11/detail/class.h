@@ -10,9 +10,19 @@
 #pragma once
 
 #include "../attr.h"
+#include "../options.h"
 
-NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
-NAMESPACE_BEGIN(detail)
+PYBIND11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
+PYBIND11_NAMESPACE_BEGIN(detail)
+
+#if PY_VERSION_HEX >= 0x03030000 && !defined(PYPY_VERSION)
+#  define PYBIND11_BUILTIN_QUALNAME
+#  define PYBIND11_SET_OLDPY_QUALNAME(obj, nameobj)
+#else
+// In pre-3.3 Python, we still set __qualname__ so that we can produce reliable function type
+// signatures; in 3.3+ this macro expands to nothing:
+#  define PYBIND11_SET_OLDPY_QUALNAME(obj, nameobj) setattr((PyObject *) obj, "__qualname__", nameobj)
+#endif
 
 inline PyTypeObject *type_incref(PyTypeObject *type) {
     Py_INCREF(type);
@@ -48,7 +58,7 @@ inline PyTypeObject *make_static_property_type() {
         pybind11_fail("make_static_property_type(): error allocating type!");
 
     heap_type->ht_name = name_obj.inc_ref().ptr();
-#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+#ifdef PYBIND11_BUILTIN_QUALNAME
     heap_type->ht_qualname = name_obj.inc_ref().ptr();
 #endif
 
@@ -63,6 +73,7 @@ inline PyTypeObject *make_static_property_type() {
         pybind11_fail("make_static_property_type(): failure in PyType_Ready()!");
 
     setattr((PyObject *) type, "__module__", str("pybind11_builtins"));
+    PYBIND11_SET_OLDPY_QUALNAME(type, name_obj);
 
     return type;
 }
@@ -145,6 +156,31 @@ extern "C" inline PyObject *pybind11_meta_getattro(PyObject *obj, PyObject *name
 }
 #endif
 
+/// metaclass `__call__` function that is used to create all pybind11 objects.
+extern "C" inline PyObject *pybind11_meta_call(PyObject *type, PyObject *args, PyObject *kwargs) {
+
+    // use the default metaclass call to create/initialize the object
+    PyObject *self = PyType_Type.tp_call(type, args, kwargs);
+    if (self == nullptr) {
+        return nullptr;
+    }
+
+    // This must be a pybind11 instance
+    auto instance = reinterpret_cast<detail::instance *>(self);
+
+    // Ensure that the base __init__ function(s) were called
+    for (const auto &vh : values_and_holders(instance)) {
+        if (!vh.holder_constructed()) {
+            PyErr_Format(PyExc_TypeError, "%.200s.__init__() must be called when overriding __init__",
+                         vh.type->type->tp_name);
+            Py_DECREF(self);
+            return nullptr;
+        }
+    }
+
+    return self;
+}
+
 /** This metaclass is assigned by default to all pybind11 types and is required in order
     for static properties to function correctly. Users may override this using `py::metaclass`.
     Return value: New reference. */
@@ -161,7 +197,7 @@ inline PyTypeObject* make_default_metaclass() {
         pybind11_fail("make_default_metaclass(): error allocating metaclass!");
 
     heap_type->ht_name = name_obj.inc_ref().ptr();
-#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+#ifdef PYBIND11_BUILTIN_QUALNAME
     heap_type->ht_qualname = name_obj.inc_ref().ptr();
 #endif
 
@@ -169,6 +205,8 @@ inline PyTypeObject* make_default_metaclass() {
     type->tp_name = name;
     type->tp_base = type_incref(&PyType_Type);
     type->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+
+    type->tp_call = pybind11_meta_call;
 
     type->tp_setattro = pybind11_meta_setattro;
 #if PY_MAJOR_VERSION >= 3
@@ -179,6 +217,7 @@ inline PyTypeObject* make_default_metaclass() {
         pybind11_fail("make_default_metaclass(): failure in PyType_Ready()!");
 
     setattr((PyObject *) type, "__module__", str("pybind11_builtins"));
+    PYBIND11_SET_OLDPY_QUALNAME(type, name_obj);
 
     return type;
 }
@@ -338,6 +377,7 @@ extern "C" inline void pybind11_object_dealloc(PyObject *self) {
     auto type = Py_TYPE(self);
     type->tp_free(self);
 
+#if PY_VERSION_HEX < 0x03080000
     // `type->tp_dealloc != pybind11_object_dealloc` means that we're being called
     // as part of a derived type's dealloc, in which case we're not allowed to decref
     // the type here. For cross-module compatibility, we shouldn't compare directly
@@ -345,6 +385,11 @@ extern "C" inline void pybind11_object_dealloc(PyObject *self) {
     auto pybind11_object_type = (PyTypeObject *) get_internals().instance_base;
     if (type->tp_dealloc == pybind11_object_type->tp_dealloc)
         Py_DECREF(type);
+#else
+    // This was not needed before Python 3.8 (Python issue 35810)
+    // https://github.com/pybind/pybind11/issues/1946
+    Py_DECREF(type);
+#endif
 }
 
 /** Create the type which can be used as a common base for all classes.  This is
@@ -363,7 +408,7 @@ inline PyObject *make_object_base_type(PyTypeObject *metaclass) {
         pybind11_fail("make_object_base_type(): error allocating type!");
 
     heap_type->ht_name = name_obj.inc_ref().ptr();
-#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
+#ifdef PYBIND11_BUILTIN_QUALNAME
     heap_type->ht_qualname = name_obj.inc_ref().ptr();
 #endif
 
@@ -384,6 +429,7 @@ inline PyObject *make_object_base_type(PyTypeObject *metaclass) {
         pybind11_fail("PyType_Ready failed in make_object_base_type():" + error_string());
 
     setattr((PyObject *) type, "__module__", str("pybind11_builtins"));
+    PYBIND11_SET_OLDPY_QUALNAME(type, name_obj);
 
     assert(!PyType_HasFeature(type, Py_TPFLAGS_HAVE_GC));
     return (PyObject *) heap_type;
@@ -429,7 +475,7 @@ extern "C" inline int pybind11_clear(PyObject *self) {
 /// Give instances of this type a `__dict__` and opt into garbage collection.
 inline void enable_dynamic_attributes(PyHeapTypeObject *heap_type) {
     auto type = &heap_type->ht_type;
-#if defined(PYPY_VERSION)
+#if defined(PYPY_VERSION) && (PYPY_VERSION_NUM < 0x06000000)
     pybind11_fail(std::string(type->tp_name) + ": dynamic attributes are "
                                                "currently not supported in "
                                                "conjunction with PyPy!");
@@ -456,7 +502,7 @@ extern "C" inline int pybind11_getbuffer(PyObject *obj, Py_buffer *view, int fla
         if (tinfo && tinfo->get_buffer)
             break;
     }
-    if (view == nullptr || obj == nullptr || !tinfo || !tinfo->get_buffer) {
+    if (view == nullptr || !tinfo || !tinfo->get_buffer) {
         if (view)
             view->obj = nullptr;
         PyErr_SetString(PyExc_BufferError, "pybind11_getbuffer(): Internal error");
@@ -472,6 +518,13 @@ extern "C" inline int pybind11_getbuffer(PyObject *obj, Py_buffer *view, int fla
     view->len = view->itemsize;
     for (auto s : info->shape)
         view->len *= s;
+    view->readonly = info->readonly;
+    if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE && info->readonly) {
+        if (view)
+            view->obj = nullptr;
+        PyErr_SetString(PyExc_BufferError, "Writable buffer requested for readonly storage");
+        return -1;
+    }
     if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
         view->format = const_cast<char *>(info->format.c_str());
     if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES) {
@@ -504,13 +557,15 @@ inline void enable_buffer_protocol(PyHeapTypeObject *heap_type) {
 inline PyObject* make_new_python_type(const type_record &rec) {
     auto name = reinterpret_steal<object>(PYBIND11_FROM_STRING(rec.name));
 
-#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
-    auto ht_qualname = name;
-    if (rec.scope && hasattr(rec.scope, "__qualname__")) {
-        ht_qualname = reinterpret_steal<object>(
+    auto qualname = name;
+    if (rec.scope && !PyModule_Check(rec.scope.ptr()) && hasattr(rec.scope, "__qualname__")) {
+#if PY_MAJOR_VERSION >= 3
+        qualname = reinterpret_steal<object>(
             PyUnicode_FromFormat("%U.%U", rec.scope.attr("__qualname__").ptr(), name.ptr()));
-    }
+#else
+        qualname = str(rec.scope.attr("__qualname__").cast<std::string>() + "." + rec.name);
 #endif
+    }
 
     object module;
     if (rec.scope) {
@@ -537,7 +592,7 @@ inline PyObject* make_new_python_type(const type_record &rec) {
 
     auto &internals = get_internals();
     auto bases = tuple(rec.bases);
-    auto base = (bases.size() == 0) ? internals.instance_base
+    auto base = (bases.empty()) ? internals.instance_base
                                     : bases[0].ptr();
 
     /* Danger zone: from now (and until PyType_Ready), make sure to
@@ -552,8 +607,8 @@ inline PyObject* make_new_python_type(const type_record &rec) {
         pybind11_fail(std::string(rec.name) + ": Unable to create type object!");
 
     heap_type->ht_name = name.release().ptr();
-#if PY_MAJOR_VERSION >= 3 && PY_MINOR_VERSION >= 3
-    heap_type->ht_qualname = ht_qualname.release().ptr();
+#ifdef PYBIND11_BUILTIN_QUALNAME
+    heap_type->ht_qualname = qualname.inc_ref().ptr();
 #endif
 
     auto type = &heap_type->ht_type;
@@ -561,7 +616,7 @@ inline PyObject* make_new_python_type(const type_record &rec) {
     type->tp_doc = tp_doc;
     type->tp_base = type_incref((PyTypeObject *)base);
     type->tp_basicsize = static_cast<ssize_t>(sizeof(instance));
-    if (bases.size() > 0)
+    if (!bases.empty())
         type->tp_bases = bases.release().ptr();
 
     /* Don't inherit base __init__ */
@@ -571,12 +626,17 @@ inline PyObject* make_new_python_type(const type_record &rec) {
     type->tp_as_number = &heap_type->as_number;
     type->tp_as_sequence = &heap_type->as_sequence;
     type->tp_as_mapping = &heap_type->as_mapping;
+#if PY_VERSION_HEX >= 0x03050000
+    type->tp_as_async = &heap_type->as_async;
+#endif
 
     /* Flags */
-    type->tp_flags |= Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
+    type->tp_flags |= Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HEAPTYPE;
 #if PY_MAJOR_VERSION < 3
     type->tp_flags |= Py_TPFLAGS_CHECKTYPES;
 #endif
+    if (!rec.is_final)
+        type->tp_flags |= Py_TPFLAGS_BASETYPE;
 
     if (rec.dynamic_attr)
         enable_dynamic_attributes(heap_type);
@@ -599,8 +659,10 @@ inline PyObject* make_new_python_type(const type_record &rec) {
     if (module) // Needed by pydoc
         setattr((PyObject *) type, "__module__", module);
 
+    PYBIND11_SET_OLDPY_QUALNAME(type, qualname);
+
     return (PyObject *) type;
 }
 
-NAMESPACE_END(detail)
-NAMESPACE_END(PYBIND11_NAMESPACE)
+PYBIND11_NAMESPACE_END(detail)
+PYBIND11_NAMESPACE_END(PYBIND11_NAMESPACE)
