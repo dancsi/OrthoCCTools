@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ICIPAHelper.h"
+#include "CIPAHelper.h"
 
 #include <array>
 #include <string_view>
@@ -30,7 +30,7 @@ struct ICIPA_core_vert_impl {
 		return (reg == 2);
 	}
 
-	constexpr static float calculate_score(ICIPAScores scores) {
+	constexpr static float calculate_score(CIPAScores scores) {
 		return scores.c_sum
 			+ scores.es_sum
 			+ 1.932004 * scores.num_LL_on_d
@@ -61,7 +61,7 @@ struct ICIPA_nter_core_impl {
 		return (reg == 2);
 	}
 
-	constexpr static float calculate_score(ICIPAScores scores) {
+	constexpr static float calculate_score(CIPAScores scores) {
 		return scores.c_sum
 			+ scores.es_sum
 			+ 2.257456 * scores.num_LL_on_d
@@ -70,5 +70,5 @@ struct ICIPA_nter_core_impl {
 	}
 };
 
-using ScoringEngineICIPACoreVert = ICIPAHelper<ICIPA_core_vert_impl>;
-using ScoringEngineICIPANterCore = ICIPAHelper<ICIPA_nter_core_impl>;
+using ScoringEngineICIPACoreVert = CIPAHelper<ICIPA_core_vert_impl>;
+using ScoringEngineICIPANterCore = CIPAHelper<ICIPA_nter_core_impl>;
