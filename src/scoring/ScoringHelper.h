@@ -3,6 +3,7 @@
 #include <array>
 #include <cstring>
 #include <map>
+#include <string>
 #include <string_view>
 #include <tuple>
 #include <vector>
@@ -42,7 +43,7 @@ namespace detail {
 
 namespace ScoringOptions {
 	enum class Orientation : uint8_t { parallel, antiparallel, both, invalid };
-	typedef int16_t alignment_t;
+	typedef int32_t alignment_t;
 
 	struct aligned_score_t {
 		float score;
@@ -109,7 +110,7 @@ struct ScoringHelper {
 		}
 		
 
-		aligned_score_t best_score{ sc.score(chain1, chain2), 0 };
+		aligned_score_t best_score{ std::numeric_limits<float>::infinity(), 0 };
 
 		const std::string_view original_chain1{ buf1.data(), buf1.size() };
 		const std::string_view original_chain2{ buf2.data(), buf2.size() };
@@ -123,8 +124,6 @@ struct ScoringHelper {
 		alignment_t prev_displacement = 0;
 
 		for (auto displacement : alignment) {
-			if (displacement == 0) continue;
-
 			auto positions_to_trim = displacement - prev_displacement;
 			prev_displacement = displacement;
 
