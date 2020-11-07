@@ -10,6 +10,7 @@
 #include <random>
 
 using namespace std;
+namespace fs = std::filesystem;
 
 vector<pair<int, int>> initial_pair_set;
 PeptideSet trimmed_set, initial_set;
@@ -114,7 +115,11 @@ int main(int argc, char **argv) {
 		trimmed_set.push_back(p.remove_padding());
 	}
 
-	ScoringEnginePotapov sc;
+	ScoringEnginePotapov sc(
+			ScoringEnginePotapov::find_weights_file(
+				fs::path(argv[0]).parent_path()
+			)
+		);
 
 	cout << "Initial scoring\n";
 
