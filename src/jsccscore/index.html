@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Meh</title>
+    <title>Coiled Coil interaction scoring</title>
     <script src="script.js"></script>
   </head>
   <body>
@@ -23,7 +23,7 @@
 
     <div>
       <label for="truncate">Truncate</label>
-      <input type="checkbox" id="truncate">
+      <input type="checkbox" id="truncate" checked>
     </div>
 
     <div id="orientationChooser">
@@ -35,9 +35,10 @@
 
     <div id="scoringEngineChooser">
       <p>Function</p>
-      <input type="radio" id="bcipa" name="scoringEngine" checked> <label for="bcipa">bcipa</label>
-      <input type="radio" id="icipa_core_vert" name="scoringEngine"> <label for="icipa_core_vert">icipa_core_vert</label>
+      <input type="radio" id="icipa_core_vert" name="scoringEngine" checked> <label for="icipa_core_vert">icipa_core_vert</label>
       <input type="radio" id="icipa_nter_core" name="scoringEngine"> <label for="icipa_nter_core">icipa_nter_core</label>
+      <input type="radio" id="bcipa" name="scoringEngine"> <label for="bcipa">bcipa</label>
+      <input type="radio" id="potapov" name="scoringEngine"> <label for="potapov">Potapov</label>
     </div>
 
     <div>

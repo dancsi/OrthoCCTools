@@ -1,20 +1,33 @@
 function encodeText(memory, base, string) {
+    const view = new Uint8Array(memory.buffer);
     for (let i = 0; i < string.length; i++) {
-        memory[base + i] = string.charCodeAt(i);
+        view[base + i] = string.charCodeAt(i);
     }
-    memory[base + string.length] = 0;
+    view[base + string.length] = 0;
 }
 
-function decodeText(memory, base) {
+function decodeText(memory, base, maxLen = -1) {
+    const view = new Uint8Array(memory.buffer);
     let cursor = base;
     let result = '';
 
-    while (memory[cursor] !== 0) {
-        console.log(memory[cursor])
-        result += String.fromCharCode(memory[cursor++]);
+    while (memory[cursor] !== 0 && (maxLen-- !== 0)) {
+        result += String.fromCharCode(view[cursor++]);
     }
 
     return result;
+}
+
+function decodeScore(memory, ptr) {
+    const structView = (new Uint8Array(memory.buffer)).slice(ptr, ptr+4+4+1);
+    const score = (new Float32Array(structView.buffer.slice(0,8)))[0];
+    const align = (new Int32Array(structView.buffer.slice(0,8)))[1];
+    const orientation = (structView[8] == 0)?"parallel":"antiparallel";
+    return {
+        "score": score,
+        "align": align,
+        "orientation": orientation
+    };
 }
 
 function prepareStrings(memory, buf1, buf2, seq1, seq2) {
@@ -40,7 +53,7 @@ function setChangeCallback(callback) {
         const truncate = elTruncate.checked ? 1 : 0;
 
         const res = callback(seq1, seq2, align, truncate, orientation, scoringEngine);
-        elRes.textContent = res.toString();
+        elRes.textContent = JSON.stringify(res);
     }
 
     realCallback();
@@ -67,14 +80,20 @@ function main() {
     };
 
     const memory = new WebAssembly.Memory({ initial: 2 });
+
     (async () => {
         const wasmBuf = await (await fetch("libscore.wasm")).arrayBuffer();
+        const scoreDat = await (await fetch("scores.dat")).text();
         const { instance } = await WebAssembly.instantiate(
-            wasmBuf, { "env": { "memory": memory } }
+            wasmBuf, { "env": { 
+                "memory": memory, 
+                "fill_score_dat_buffer": ptr => encodeText(memory, ptr, scoreDat)
+            } }
         );
+
         let maxLen = 1024;
         let buf1 = instance.exports.alloc_string(maxLen);
-        let buf2 = instance.exports.alloc_string(maxLen);   
+        let buf2 = instance.exports.alloc_string(maxLen);
 
         setChangeCallback((seq1, seq2, align, truncate, orientationStr, engineStr) => {
             const len = Math.max(seq1.length, seq2.length);
@@ -85,12 +104,12 @@ function main() {
                 buf1 = instance.exports.alloc_string(maxLen);
                 buf2 = instance.exports.alloc_string(maxLen);
             }
-            const view = new Uint8Array(memory.buffer);
-            prepareStrings(view, buf1, buf2, seq1, seq2);
+            prepareStrings(memory, buf1, buf2, seq1, seq2);
 
             const orientation = orientationLookup[orientationStr];
             const engine = instance.exports[engineStr];
-            return engine(buf1, maxLen, buf2, maxLen, align, truncate, orientation);
+            const scoreStructPtr = engine(buf1, maxLen, buf2, maxLen, align, truncate, orientation);
+            return decodeScore(memory, scoreStructPtr);
         });
     })();
 }
