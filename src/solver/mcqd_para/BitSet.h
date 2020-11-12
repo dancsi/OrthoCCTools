@@ -29,29 +29,6 @@
 #include <algorithm>
 #include <iostream>
 
-#ifdef _MSC_VER
-#include <intrin.h>
-
-uint32_t __inline __builtin_ctzl(uint64_t value)
-{
-	unsigned long trailing_zero = 0;
-
-	if (_BitScanForward64(&trailing_zero, value))
-	{
-		return trailing_zero;
-	}
-	else
-	{
-		return 32;
-	}
-}
-
-#define __builtin_popcount __popcnt
-#define __builtin_popcountl __popcnt64
-#define __builtin_popcountll __popcnt64
-
-#endif
-
 template<unsigned int I>
 struct static_log2 {
     enum {
@@ -130,23 +107,67 @@ unsigned int countTrailing0M(Int v) {
     };
 }
 
+// CTZ and POPCNT instrinsics for various platforms
+
+#if __cpp_lib_bitops >= 201907L
+#include <bit>
+#include <type_traits>
+
+template<typename Int>
+unsigned int countTrailing0(Int v) {
+    typedef std::make_unsigned_t<Int> UInt;
+    return std::countr_zero<UInt>(v);
+}
+
+template<class Int>
+unsigned int countOnes(Int v) {
+    typedef std::make_unsigned_t<Int> UInt;
+    return std::popcount<UInt>(v);
+}
+#else
+
+#ifdef _MSC_VER
+#include <intrin.h>
+
+template<class Int>
+unsigned int countTrailing0(Int v) {
+    unsigned long trailing_zero = 0;
+
+    if (_BitScanForward64(&trailing_zero, value))
+    {
+        return trailing_zero;
+    }
+    else
+    {
+        return 64;
+    }
+}
+
+#define __builtin_popcount __popcnt
+#define __builtin_popcountl __popcnt64
+#define __builtin_popcountll __popcnt64
+
+#else
 // find first bit that equals to 1 (GCC only, undefined return if the operand equals 0 - [often 0 or the maximum number of bits])
 template<class Int>
 unsigned int countTrailing0(Int v) {
-    if (sizeof(Int) < sizeof(int)) {return countTrailing0<int>(v);}
+    if (sizeof(Int) < sizeof(int)) { return countTrailing0<int>(v); }
     if (sizeof(Int) == sizeof(int)) return __builtin_ctz(v);
     if (sizeof(Int) == sizeof(long int)) return __builtin_ctzll(v);
     if (sizeof(Int) >= sizeof(long long int)) return __builtin_ctzll(v);
 }
+#endif
 
 // count number of bits that equal 1 (GCC only)
 template<class Int>
 unsigned int countOnes(Int v) {
-    if (sizeof(Int) < sizeof(int)) {return countOnes<int>((int)v);}
+    if (sizeof(Int) < sizeof(int)) { return countOnes<int>((int)v); }
     if (sizeof(Int) == sizeof(int)) return __builtin_popcount(v);
     if (sizeof(Int) == sizeof(long int)) return __builtin_popcountl(v);
     if (sizeof(Int) >= sizeof(long long int)) return __builtin_popcountll(v);
 }
+
+#endif
 
 class BitSet {
 protected:
