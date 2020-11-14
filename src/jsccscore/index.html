@@ -19,6 +19,7 @@
     <div>
       <label for="align">Alignment</label>
       <input type="number" id="align" step=7 value=0 min=0>
+      <label for="align">(largest shift to scan (in residues) )</label>
     </div>
 
     <div>
@@ -41,11 +42,10 @@
       <input type="radio" id="potapov" name="scoringEngine"> <label for="potapov">Potapov</label>
     </div>
 
-    <div>
-      <p>
-        <span>Result: </span>
-        <span id="res"></span>
-      </p>
+    <div id="res">
+      <p>Score: <span id="resScore"></span></p>
+      <p>Alignment: <span id="resAlignment"></span></p>
+      <p>Orientation: <span id="resOrientation"></span></p>
     </div>
     
   </body>

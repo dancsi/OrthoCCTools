@@ -38,7 +38,10 @@ char aligned_oriented_score_buf[sizeof(ScoringOptions::aligned_oriented_score_t)
 template<typename T>
 char* score_func_wrapper(ScoringHelper<T>& helper, char *s1, int n1, char *s2, int n2, int max_align, int truncate, int orientation) {
 	std::vector<ScoringOptions::alignment_t> align;
-	for(int i=0;i<=max_align;i+=7) align.push_back(i); 
+	for(int i=0;i<=max_align;i+=7) {
+		align.push_back(i);
+		align.push_back(-i);
+	} 
 
 	auto score = helper.score(
 		s1, s2, 

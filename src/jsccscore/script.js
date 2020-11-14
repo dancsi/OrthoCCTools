@@ -53,7 +53,8 @@ function setChangeCallback(callback) {
         const truncate = elTruncate.checked ? 1 : 0;
 
         const res = callback(seq1, seq2, align, truncate, orientation, scoringEngine);
-        elRes.textContent = JSON.stringify(res);
+        
+        renderResult(res);
     }
 
     realCallback();
@@ -70,6 +71,18 @@ function setChangeCallback(callback) {
         scoringEngine = e.target.id;
         realCallback();
     }, false);
+}
+
+function renderResult(res) {
+    const scoringEngine = document.querySelector('input[name="scoringEngine"]:checked').id;
+    let scoreSuffix = " °C";
+    if(scoringEngine == "potapov") {
+        scoreSuffix = "";
+    }
+
+    document.getElementById("resScore").innerText = (-res.score).toFixed(2) + scoreSuffix;
+    document.getElementById("resAlignment").innerText = res.align;
+    document.getElementById("resOrientation").innerText = res.orientation;
 }
 
 function main() {
