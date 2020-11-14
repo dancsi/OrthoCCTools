@@ -63,6 +63,8 @@ struct CIPAHelper
 
 	float generic_pair_score(const char c1, const char c2, weights_t &weights)
 	{
+		if (!isupper(c1) || !isupper(c2)) return 0;
+
 		char buf[2];
 		buf[0] = c1;
 		buf[1] = c2;

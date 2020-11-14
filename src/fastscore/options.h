@@ -49,7 +49,10 @@ Available options:
 			unique_alignments.insert(static_cast<ScoringOptions::alignment_t>(abs(num)));
 		}
 
-		std::copy(unique_alignments.begin(), unique_alignments.end(), std::back_inserter(alignment));
+		for (auto& align : unique_alignments) {
+			alignment.push_back(align);
+			alignment.push_back(-align);
+		}
 	}
 
 	Options(int argc, char** argv) : args(argc, argv) {
@@ -83,6 +86,7 @@ Available options:
 		}
 		else {
 			for (int i = 0; i <= max_heptad_displacement; i++) {
+				alignment.push_back(-7 * i);
 				alignment.push_back(+7 * i);
 			}
 		}

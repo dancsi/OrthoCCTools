@@ -83,63 +83,65 @@ struct ScoringHelper {
 	template<typename... Args>
 	ScoringHelper(Args&&... args) : sc(std::forward<Args>(args)...) {}
 
+	// this assumes that chain1 and chain2 are of the same length
+	std::pair<std::string_view, std::string_view> align_truncate(std::string_view chain1, std::string_view chain2, alignment_t alignment, bool truncate) {
+		if (alignment > 0) {
+			chain1.remove_prefix(alignment);
+			chain2.remove_suffix(alignment);
+		}
+		else {
+			chain1.remove_suffix(-alignment);
+			chain2.remove_prefix(-alignment);
+		}
+
+		if (truncate) {
+			auto length = chain1.length();
+
+			int left_overhang = 0;
+			while (left_overhang + 7 <= length && (*(chain1.begin() + 6) == '-' || *(chain2.begin() + 6) == '-')) {
+				chain1.remove_prefix(7);
+				chain2.remove_prefix(7);
+				left_overhang += 7;
+			}
+
+			length = chain1.length();
+			int right_overhang = 0;
+
+			while (right_overhang + 7 <= length && (*(chain1.rbegin() + 6) == '-' || *(chain2.rbegin() + 6) == '-')) {
+				chain1.remove_suffix(7);
+				chain2.remove_suffix(7);
+				right_overhang += 7;
+			}
+		}
+		return { chain1, chain2 };
+	}
+
 	aligned_score_t score(std::string_view chain1, std::string_view chain2, const std::vector<alignment_t>& alignment, bool truncate)
 	{
 		const auto max_displacement = 7;
-		auto n1 = chain1.length(), n2 = chain2.length();
-		auto buffer1_size = n1 + 2 * max_displacement;
-		auto buffer2_size = n2 + 2 * max_displacement;
+		auto n1 = chain1.length(), n2 = chain2.length(), n = std::max(n1, n2);
+		auto buffer_size = n + 2 * max_displacement;
 
-		static thread_local std::vector<char> buf1(buffer1_size, '-'), buf2(buffer2_size, '-');
-		if (buf1.size() < buffer1_size) buf1.resize(buffer1_size, '-');
-		if (buf2.size() < buffer2_size) buf2.resize(buffer2_size, '-');
+		static thread_local std::vector<char> buf1(buffer_size, '-'), buf2(buffer_size, '-');
+		if (buf1.size() < buffer_size) buf1.resize(buffer_size, '-');
+		if (buf2.size() < buffer_size) buf2.resize(buffer_size, '-');
 
-		if (truncate) {
-			memcpy(buf1.data(), chain1.data(), n1); buf1.resize(n1);
-			memcpy(buf2.data(), chain2.data(), n2); buf2.resize(n2);
-		}
-		else {
-			//restore padding
-			memset(buf1.data(), '-', max_displacement);
-			memset(buf1.data() + max_displacement + n1, '-', max_displacement);
-			memset(buf2.data(), '-', max_displacement);
-			memset(buf2.data() + max_displacement + n2, '-', max_displacement);
-
-			memcpy(buf1.data() + max_displacement, chain1.data(), n1);
-			memcpy(buf2.data() + max_displacement, chain2.data(), n2);
-		}
-		
+		memset(buf1.data(), '-', buffer_size);
+		memset(buf2.data(), '-', buffer_size);
+		memcpy(buf1.data() + max_displacement, chain1.data(), n1);
+		memcpy(buf2.data() + max_displacement, chain2.data(), n2);
 
 		aligned_score_t best_score{ std::numeric_limits<float>::infinity(), 0 };
 
-		const std::string_view original_chain1{ buf1.data(), buf1.size() };
-		const std::string_view original_chain2{ buf2.data(), buf2.size() };
-
-		auto shifting_chain1 = original_chain1;
-		auto shifting_chain2 = original_chain2;
-
-		auto right_truncated_chain1 = original_chain1;
-		auto right_truncated_chain2 = original_chain2;
-
-		alignment_t prev_displacement = 0;
+		const std::string_view padded_chain1{ buf1.data(), buf1.size() };
+		const std::string_view padded_chain2{ buf2.data(), buf2.size() };
 
 		for (auto displacement : alignment) {
-			auto positions_to_trim = displacement - prev_displacement;
-			prev_displacement = displacement;
+			auto [aligned_chain1, aligned_chain2] = align_truncate(padded_chain1, padded_chain2, displacement, truncate);
 
-			shifting_chain1.remove_prefix(positions_to_trim);
-			shifting_chain2.remove_prefix(positions_to_trim);
+			aligned_score_t current_score = { sc.score(aligned_chain1, aligned_chain2), displacement };
 
-			if (truncate) {
-				right_truncated_chain1.remove_suffix(positions_to_trim);
-				right_truncated_chain2.remove_suffix(positions_to_trim);
-			}
-
-			aligned_score_t left_trimmed_score = { sc.score(right_truncated_chain1, shifting_chain2), -displacement };
-			aligned_score_t right_trimmed_score = { sc.score(shifting_chain1, right_truncated_chain2), displacement };
-
-			if (left_trimmed_score < best_score) best_score = left_trimmed_score;
-			if (right_trimmed_score < best_score) best_score = right_trimmed_score;
+			if (current_score < best_score) best_score = current_score;
 		}
 
 		return best_score;
