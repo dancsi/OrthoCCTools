@@ -15,17 +15,11 @@ def plot_single(path, ax):
     bin_path = path.with_suffix('.bin')
     fasta_path = bin_path.with_suffix('.fasta')
 
-    if not bin_path.exists():
-        run([r'..\..\build-win\fastscore', str(fasta_path)])
-
     mm = load(str(bin_path))
     im = ax.imshow(mm, cmap='hot')
     return im
 
 if __name__ == "__main__":
-
-    if len(sys.argv) < 2:
-        sys.argv.append(r"""..\..\data\tetraheptads.orthoset.bin""")
 
     paths = [Path(p) for p in sys.argv[1:]]
 
