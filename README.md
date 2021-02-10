@@ -18,6 +18,8 @@ cmake --install . --config Release
 ```
 The only exception to this is `jsccscore`, which is built separately using the [WASI SDK](https://github.com/WebAssembly/wasi-sdk). See its [README.md](src/jsccscore/README.md) for more details.
 
+The build was tested on Windows 10 running Visual Studio 16.8.5 and Python 3.8.5 (Anaconda) as well as Ubuntu 20.10 running GCC 10.2.0 and Python 3.8.6.
+
 # Usage instructions
 
 First, we generate an initial set of 4-heptad peptides.
