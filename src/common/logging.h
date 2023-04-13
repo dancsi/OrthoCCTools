@@ -26,7 +26,7 @@ namespace logging {
 
 	template<typename... Args>
 	void log_and_throw(const char* fmt, const Args&... args) {
-		auto&& msg = fmt::format(fmt, args...);
+		auto&& msg = std::format(fmt, args...);
 		console->error(msg);
 		throw std::runtime_error(msg);
 	}

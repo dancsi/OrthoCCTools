@@ -59,9 +59,9 @@ unsigned int log2(Int v) {
     static char logTable256[256];
     static LogTableSetter dummy(logTable256);
 
-    register unsigned int shr = sizeof(Int) << 2;
-    register unsigned int ofs = 0;
-    register Int v2;
+    unsigned int shr = sizeof(Int) << 2;
+    unsigned int ofs = 0;
+    Int v2;
 
     while (shr >= 8) {
         v2 = v >> shr;
