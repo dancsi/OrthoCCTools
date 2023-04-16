@@ -1,6 +1,6 @@
 set(SOURCES 
-	${CMAKE_CURRENT_SOURCE_DIR}/MemoryMapped.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/MemoryMapped.h
+	MemoryMapped.cpp
+	MemoryMapped.h
 )
 
 if(WIN32)

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <filesystem>
-#include <iosfwd>
 #include <map>
 #include <vector>
 
@@ -14,10 +12,7 @@ struct ScoringEnginePotapov {
 public:
 	const static int max_peptide_length = 100;
 
-	ScoringEnginePotapov(std::istream&& istr);
-	ScoringEnginePotapov(std::string_view sv);
-
-	static std::ifstream find_weights_file(std::filesystem::path exe_dir, std::filesystem::path = "scores.dat");
+	ScoringEnginePotapov();
 
 	float score(string_view chain1, string_view chain2);
 

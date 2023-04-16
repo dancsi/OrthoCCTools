@@ -53,5 +53,7 @@ build-mingw/
 /reference
 /data
 /src/util/temp
+out/
+out.js/
 
 *.pyc

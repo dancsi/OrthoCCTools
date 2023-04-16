@@ -1,6 +1,2 @@
-add_library(flags INTERFACE )
+add_library(flags INTERFACE flags.h)
 target_include_directories(flags INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/flags.h)
-
-#target_sources(flags INTERFACE ${SOURCE})

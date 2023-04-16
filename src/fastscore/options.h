@@ -43,7 +43,6 @@ Available options:
 		std::string token;
 		std::set<ScoringOptions::alignment_t> unique_alignments;
 
-		int res = 0;
 		while (std::getline(ss, token, ',')) {
 			int num = std::stoi(token);
 			unique_alignments.insert(static_cast<ScoringOptions::alignment_t>(abs(num)));
@@ -51,7 +50,10 @@ Available options:
 
 		for (auto& align : unique_alignments) {
 			alignment.push_back(align);
-			alignment.push_back(-align);
+			if (align != 0)
+			{
+				alignment.push_back(-align);
+			}
 		}
 	}
 
@@ -85,7 +87,8 @@ Available options:
 			parse_alignment(alignment_str.value());
 		}
 		else {
-			for (int i = 0; i <= max_heptad_displacement; i++) {
+			alignment.push_back(0);
+			for (int i = 1; i <= max_heptad_displacement; i++) {
 				alignment.push_back(-7 * i);
 				alignment.push_back(+7 * i);
 			}

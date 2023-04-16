@@ -1,77 +1,31 @@
 #include "ScoringEnginePotapov.h"
+#include "PotapovScores.h"
 
-#include <filesystem>
-#include <fstream>
-#include <iostream>
 #include <limits>
-#include <streambuf>
 #include <string>
 #include <tuple>
 
+#include <cfenv>
 #include <cstdlib>
 
 using std::string_view;
-namespace fs = std::filesystem;
 
-std::ifstream ScoringEnginePotapov::find_weights_file(fs::path exe_dir, fs::path fname) {
-	if (!fs::exists(fname)) {
-		auto alt_path = exe_dir / fname.filename();
-		if (fs::exists(alt_path)) {
-			fname = alt_path;
-		}
-		else {
-			std::cout << "Can not find " << fname << " or " << alt_path;
-			exit(1);
-		}
-	}
-
-	return std::ifstream(fname);
-}
-
-ScoringEnginePotapov::ScoringEnginePotapov(std::istream&& fin)
-	: ScoringEnginePotapov(
-		std::string(
-			std::istreambuf_iterator<char>(fin),
-			std::istreambuf_iterator<char>()))
-{
-}
-
-std::tuple<std::string_view, std::string_view, float> parse_line(std::string_view line)
-{
-	auto reg_end = line.find_first_of(' ');
-	auto reg = line.substr(0, reg_end);
-	auto res_start = line.find_first_not_of(' ', reg_end);
-	auto res_end = line.find_first_of(' ', res_start + 1);
-	auto res = line.substr(res_start, res_end - res_start);
-	auto num_start = line.find_first_not_of(' ', res_end);
-	auto num_str = line.substr(num_start);
-	float num = std::atof(num_str.data());
-	//std::from_chars(num_str.data(), num_str.data() + num_str.length(), num);
-	return { reg, res, num };
-}
-
-ScoringEnginePotapov::ScoringEnginePotapov(std::string_view sv)
+ScoringEnginePotapov::ScoringEnginePotapov()
 {
 	pair_weights.reserve(8);
 	triple_weights.reserve(10);
 
-	size_t line_start = 0;
-	do
+	for(const PotapovScore& s: potapov_scores)
 	{
-		size_t line_end = sv.find_first_of("\r\n", line_start);
-		if (line_end == std::string_view::npos)
-			line_end = sv.length();
-		auto [registers, residues, value] = parse_line(sv.substr(line_start, (line_end - line_start)));
-		if (registers.length() == 2)
+		if (s.registers.length() == 2)
 		{
-			insert_weight<2>(registers, residues, value, pair_weights, pair_register_map);
+			insert_weight<2>(s.registers, s.residues, s.value, pair_weights, pair_register_map);
 		}
 		else
 		{
-			insert_weight<3>(registers, residues, value, triple_weights, triple_register_map);
+			insert_weight<3>(s.registers, s.residues, s.value, triple_weights, triple_register_map);
 		}
-		line_start = sv.find_first_not_of("\r\n", line_end);
-	} while (line_start != std::string_view::npos);
+	}
 
 	init_pairs();
 	init_triples();

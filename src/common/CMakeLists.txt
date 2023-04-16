@@ -1,13 +1,15 @@
 set(COMMON_SOURCES 
-	${CMAKE_CURRENT_SOURCE_DIR}/logging.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/PeptideSet.cpp
+	logging.cpp
+	PeptideSet.cpp
 )
 
 set(COMMON_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/logging.h
-	${CMAKE_CURRENT_SOURCE_DIR}/SpecialMatrices.h
-	${CMAKE_CURRENT_SOURCE_DIR}/MemoryMappedMatrix.h
-	${CMAKE_CURRENT_SOURCE_DIR}/PeptideSet.h
+	logging.h
+	SpecialMatrices.h
+	MemoryMappedMatrix.h
+	PeptideSet.h
+	TriangluarIndex.h
+	ParallelFor.h
 )
 
 add_library(common ${COMMON_SOURCES} ${COMMON_HEADERS})

@@ -115,11 +115,7 @@ int main(int argc, char **argv) {
 		trimmed_set.push_back(p.remove_padding());
 	}
 
-	ScoringEnginePotapov sc(
-			ScoringEnginePotapov::find_weights_file(
-				fs::path(argv[0]).parent_path()
-			)
-		);
+	ScoringEnginePotapov sc{};
 
 	cout << "Initial scoring\n";
 

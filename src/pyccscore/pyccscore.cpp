@@ -50,9 +50,7 @@ PYBIND11_MODULE(pyccscore, m)
 		.value("INVALID", ScoringOptions::Orientation::invalid)
 		.export_values();
 
-	auto potapov = std::make_shared<ScoringHelper<ScoringEnginePotapov>>(
-		ScoringEnginePotapov::find_weights_file(".")
-	);
+	auto potapov = std::make_shared<ScoringHelper<ScoringEnginePotapov>>();
 	auto bcipa = std::make_shared<ScoringHelper<ScoringEngineBCIPA>>();
 	auto qcipa = std::make_shared<ScoringHelper<ScoringEngineQCIPA>>();
 	auto icipa_core_vert = std::make_shared<ScoringHelper<ScoringEngineICIPACoreVert>>();

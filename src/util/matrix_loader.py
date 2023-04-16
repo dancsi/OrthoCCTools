@@ -1,6 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
-
 
 def load(path):
     header = np.fromfile(path, dtype=np.uint64, count=4)
