@@ -9,6 +9,7 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace fs = std::filesystem;
@@ -173,5 +174,7 @@ Available options:
 				return "invalid";
 			}
 		}(score_func) << endl;
+
+		cout << "Running on " << std::thread::hardware_concurrency() << " threads\n";
 	}
 };
