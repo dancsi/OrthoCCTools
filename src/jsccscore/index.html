@@ -3,18 +3,19 @@
   <head>
     <meta charset="utf-8">
     <title>Coiled Coil interaction scoring</title>
-    <script src="script.js"></script>
+    <script src="wrapper.js"></script>
+    <script src="ui.js"></script>
+    <script type="text/javascript">
+      
+    </script>
+    <script src="fastscore.js"></script>
   </head>
   <body>
     <div>
-      <label for="seq1">Sequence 1</label>
-      <input type="text" id="seq1" value="DEIQALEEENAQLEQENAALEEEIAQLEYG">
+      <input type="file" id="filepicker" />
+      <input type="button" id="run" value="Run">
     </div>
 
-    <div>
-      <label for="seq1">Sequence 2</label>
-      <input type="text" id="seq2" value="DKIAQLKEKNAALKEKNQQLKEKIQALKYG">
-    </div>
 
     <div>
       <label for="align">Alignment</label>
@@ -29,23 +30,17 @@
 
     <div id="orientationChooser">
       <p>Orientation</p>
-      <input type="radio" id="parallel" name="orientation" checked> <label for="parallel">Parallel</label>
-      <input type="radio" id="antiparallel" name="orientation"> <label for="antiparallel">Antiparallel</label>
-      <input type="radio" id="both" name="orientation"> <label for="both">Both</label>
+      <input type="radio" id="parallel" name="orientation" value="Parallel" checked> <label for="parallel">Parallel</label>
+      <input type="radio" id="antiparallel" name="orientation" value="Antiparallel"> <label for="antiparallel">Antiparallel</label>
+      <input type="radio" id="both" name="orientation" value="Both"> <label for="both">Both</label>
     </div>
 
     <div id="scoringEngineChooser">
       <p>Function</p>
-      <input type="radio" id="icipa_core_vert" name="scoringEngine" checked> <label for="icipa_core_vert">icipa_core_vert</label>
-      <input type="radio" id="icipa_nter_core" name="scoringEngine"> <label for="icipa_nter_core">icipa_nter_core</label>
-      <input type="radio" id="bcipa" name="scoringEngine"> <label for="bcipa">bcipa</label>
-      <input type="radio" id="potapov" name="scoringEngine"> <label for="potapov">Potapov</label>
-    </div>
-
-    <div id="res">
-      <p>Score: <span id="resScore"></span></p>
-      <p>Alignment: <span id="resAlignment"></span></p>
-      <p>Orientation: <span id="resOrientation"></span></p>
+      <input type="radio" id="icipa_core_vert" name="scoringEngine" value="icipa_core_vert" checked> <label for="icipa_core_vert">icipa_core_vert</label>
+      <input type="radio" id="icipa_nter_core" name="scoringEngine" value="icipa_nter_core"> <label for="icipa_nter_core">icipa_nter_core</label>
+      <input type="radio" id="bcipa" name="scoringEngine" value="bcpia"> <label for="bcipa">bcipa</label>
+      <input type="radio" id="potapov" name="scoringEngine" value="potapov"> <label for="potapov">Potapov</label>
     </div>
     
   </body>
