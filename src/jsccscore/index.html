@@ -1,47 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Coiled Coil interaction scoring</title>
-    <script src="wrapper.js"></script>
-    <script src="ui.js"></script>
-    <script type="text/javascript">
-      
-    </script>
-    <script src="fastscore.js"></script>
-  </head>
-  <body>
-    <div>
-      <input type="file" id="filepicker" />
-      <input type="button" id="run" value="Run">
-    </div>
+
+<head>
+  <meta charset="utf-8">
+  <title>iCipa Coiled Coil interaction scoring</title>
+  <script src="wrapper.js"></script>
+  <script src="ui.js"></script>
+  <script src="fastscore.js"></script>
+</head>
+
+<body>
+  <h1>iCipa scoring function</h1>
+  <p>Sequences should start with the f register or be padded using a -.</p>
+
+  <p><b>When using this server please cite Boldrige, Ljubetic et al., <br><a
+        href="https://www.biorxiv.org/content/10.1101/2020.11.12.377184v1">
+        A Multiplexed Bacterial Two-Hybrid for Rapid Characterization of Protein-Protein Interactions and Iterative
+        Protein Design | bioRxiv
+      </a></b></p>
+
+  <div>
+    <p>Choose a file</p>
+    <input type="file" id="filepicker" />
+  </div>
 
 
-    <div>
-      <label for="align">Alignment</label>
-      <input type="number" id="align" step=7 value=0 min=0>
-      <label for="align">(largest shift to scan (in residues) )</label>
-    </div>
+  <div>
+    <label for="align">Alignment</label>
+    <input type="number" id="align" step=7 value=0 min=0>
+    <label for="align">largest shift to scan (in residues). Will scan ± number of residues. </label>
+  </div>
 
-    <div>
-      <label for="truncate">Truncate</label>
-      <input type="checkbox" id="truncate" checked>
-    </div>
+  <div>
+    <label for="truncate">Truncate</label>
+    <input type="checkbox" id="truncate" checked>
+  </div>
 
-    <div id="orientationChooser">
-      <p>Orientation</p>
-      <input type="radio" id="parallel" name="orientation" value="Parallel" checked> <label for="parallel">Parallel</label>
-      <input type="radio" id="antiparallel" name="orientation" value="Antiparallel"> <label for="antiparallel">Antiparallel</label>
-      <input type="radio" id="both" name="orientation" value="Both"> <label for="both">Both</label>
-    </div>
+  <div id="orientationChooser">
+    <p>Orientation</p>
+    <input type="radio" id="parallel" name="orientation" value="Parallel" checked> <label
+      for="parallel">Parallel</label>
+    <input type="radio" id="antiparallel" name="orientation" value="Antiparallel"> <label
+      for="antiparallel">Antiparallel</label>
+    <input type="radio" id="both" name="orientation" value="Both"> <label for="both">Both</label>
+  </div>
 
-    <div id="scoringEngineChooser">
-      <p>Function</p>
-      <input type="radio" id="icipa_core_vert" name="scoringEngine" value="icipa_core_vert" checked> <label for="icipa_core_vert">icipa_core_vert</label>
-      <input type="radio" id="icipa_nter_core" name="scoringEngine" value="icipa_nter_core"> <label for="icipa_nter_core">icipa_nter_core</label>
-      <input type="radio" id="bcipa" name="scoringEngine" value="bcpia"> <label for="bcipa">bcipa</label>
-      <input type="radio" id="potapov" name="scoringEngine" value="potapov"> <label for="potapov">Potapov</label>
-    </div>
-    
-  </body>
+  <div id="scoringEngineChooser">
+    <p>Scoring function</p>
+    <input type="radio" id="icipa_nter_core" name="scoringEngine" value="icipa_nter_core"> <label
+      for="icipa_nter_core">iCipa (icipa_nter_core)</label>
+    <input type="radio" id="icipa_core_vert" name="scoringEngine" value="icipa_core_vert" checked> <label
+      for="icipa_core_vert">iCipa variant (core_vert)</label>
+    <input type="radio" id="bcipa" name="scoringEngine" value="bcpia"> <label for="bcipa"><a
+        href="http://www.syntbio.net/bCIPA/index_PNAS_version.php">bCipa</a> </label>
+    <input type="radio" id="potapov" name="scoringEngine" value="potapov"> <label for="potapov"><a
+        href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004046">Potapov et al</a></label>
+  </div>
+
+  <div>
+    <p>Run fastscore</p>
+    <input type="button" id="run" value="Run">
+  </div>
+</body>
+
 </html>
