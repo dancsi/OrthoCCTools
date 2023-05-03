@@ -36,12 +36,16 @@ function getAppConfiguration( ): FastscoreArguments {
     const scoreFunctionInput = document.querySelector('input[name="scoringEngine"]:checked');
     const scoringFunctionValue = ScoreFunctions[(scoreFunctionInput as HTMLInputElement).value];
 
+    const outputFormatInput = document.querySelector('input[name="outputFormat"]:checked');
+    const outputFormatValue = OutputFormat[(outputFormatInput as HTMLInputElement).value];
+
     return {
         inputFile: inputFile,
         maxHeptadDisplacement: alignValue,
         truncate: truncateValue,
         orientation: orientationValue,
-        scoreFunction: scoringFunctionValue
+        scoreFunction: scoringFunctionValue,
+        outputFormat: outputFormatValue
     };
 }
 

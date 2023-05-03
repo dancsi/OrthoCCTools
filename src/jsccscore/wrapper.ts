@@ -24,6 +24,11 @@ enum ScoreFunctions {
     iCIPA_nter_core = "icipa_nter_core"
 };
 
+enum OutputFormat {
+    Binary = "bin",
+    CSV = "csv"
+};
+
 function getBaseName(fileName: string) {
     const lastDot = fileName.lastIndexOf(".");
     return fileName.slice(0, lastDot);
@@ -34,7 +39,8 @@ interface FastscoreArguments {
     maxHeptadDisplacement: number,
     truncate: boolean,
     orientation: Orientation,
-    scoreFunction: ScoreFunctions
+    scoreFunction: ScoreFunctions,
+    outputFormat: OutputFormat
 }
 
 async function fastscoreCommandlineWrapper(
@@ -43,7 +49,8 @@ async function fastscoreCommandlineWrapper(
         maxHeptadDisplacement = 0,
         truncate = false,
         orientation = Orientation.Parallel,
-        scoreFunction = ScoreFunctions.Potapov 
+        scoreFunction = ScoreFunctions.Potapov,
+        outputFormat = OutputFormat.Binary
     }: FastscoreArguments
 ): Promise<File[]> {
 
@@ -53,7 +60,7 @@ async function fastscoreCommandlineWrapper(
     const inputFileName = inputFile.name;
     const baseName = getBaseName(inputFileName);
 
-    const argv = [inputFile.name, `--max-heptad-displacement=${maxHeptadDisplacement}`, `--truncate=${truncate ? 1 : 0}`, `--orientation=${Orientation[orientation]}`, `--score-func=${scoreFunction}`];
+    const argv = [inputFile.name, `--max-heptad-displacement=${maxHeptadDisplacement}`, `--truncate=${truncate ? 1 : 0}`, `--orientation=${Orientation[orientation]}`, `--score-func=${scoreFunction}`, `--output-format=${outputFormat}`];
     console.log(argv);
 
     callMain(argv);

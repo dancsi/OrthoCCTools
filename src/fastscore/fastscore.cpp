@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 
+#include "io.h"
 #include "options.h"
 
 #include "scoring/ScoringHelper.h"
@@ -19,10 +20,6 @@
 #include "common/TriangluarIndex.h"
 
 using namespace std;
-
-using ScoringOptions::alignment_t;
-using OrientationMatrix = SquareMatrix<ScoringOptions::Orientation>;
-using AlignmentMatrix = SquareMatrix<alignment_t>;
 
 template<typename ScoringEngineType>
 void score_pairs(
@@ -93,6 +90,8 @@ int main(int argc, char **argv) {
 		score_pairs<ScoringEngineICIPANterCore>(ps, alignment, truncate, orientation, im, om, am);
 		break;
 	}
+
+	save(options.output_format, basename, ps, im, om, am);
 
 	return 0;
 }

@@ -15,7 +15,7 @@ void PeptideSet::read(std::filesystem::path path)
 
 	while (!input.eof())
 	{
-		std::getline(input, line); 
+		std::getline(input, line); input >> std::ws;
 		if (line.empty() || isspace(line[0])) continue;
 		++line_count;
 

@@ -2,6 +2,7 @@
 
 #include "flags.h"
 #include "scoring/ScoringHelper.h"
+#include "io.h"
 
 #include <algorithm>
 #include <cctype>
@@ -27,7 +28,8 @@ Available options:
     --truncate={0, 1}                      truncate the chains when aligning them, false by default
     --orientation={parallel, antiparallel, both}
     --score-func={potapov, bcipa, qcipa	   choose scoring function
-				  icipa_core_vert, icipa_nter_core}          
+				  icipa_core_vert, icipa_nter_core}
+	--output-format={bin, csv}			   choose output format
 )");
 		exit(1);
 	}
@@ -38,6 +40,7 @@ Available options:
 	ScoringOptions::Orientation orientation;
 	ScoringOptions::ScoreFunc score_func;
 	bool truncate;
+	OutputFormat output_format;
 
 	void parse_alignment(const std::string& alignment_str) {
 		std::istringstream ss(alignment_str);
@@ -129,6 +132,17 @@ Available options:
 		else {
 			print_usage_and_exit();
 		}
+
+		auto output_format_str = args.get<string>("output-format", "bin");
+		if (output_format_str == "bin") {
+			output_format = OutputFormat::binary;
+		}
+		else if (output_format_str == "csv") {
+			output_format = OutputFormat::csv;
+		} 
+		else {
+			print_usage_and_exit();
+		}
 	}
 
 	void print_parsed() {
@@ -174,6 +188,17 @@ Available options:
 				return "invalid";
 			}
 		}(score_func) << endl;
+
+		cout << "Output format is " << [this] {
+			switch (output_format) {
+			case OutputFormat::binary:
+				return "binary";
+			case OutputFormat::csv:
+				return "csv";
+			default:
+				return "invalid";
+			}
+		}() << endl;
 
 		cout << "Running on " << std::thread::hardware_concurrency() << " threads\n";
 	}

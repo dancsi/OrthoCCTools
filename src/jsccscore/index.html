@@ -47,14 +47,22 @@
 
   <div id="scoringEngineChooser">
     <p>Scoring function</p>
-    <input type="radio" id="icipa_nter_core" name="scoringEngine" value="icipa_nter_core"> <label
+    <input type="radio" id="icipa_nter_core" name="scoringEngine" value="iCIPA_nter_core" checked> <label
       for="icipa_nter_core">iCipa (icipa_nter_core)</label>
-    <input type="radio" id="icipa_core_vert" name="scoringEngine" value="icipa_core_vert" checked> <label
+    <input type="radio" id="icipa_core_vert" name="scoringEngine" value="iCIPA_core_vert" checked> <label
       for="icipa_core_vert">iCipa variant (core_vert)</label>
-    <input type="radio" id="bcipa" name="scoringEngine" value="bcpia"> <label for="bcipa"><a
+    <input type="radio" id="bcipa" name="scoringEngine" value="bCIPA"> <label for="bcipa"><a
         href="http://www.syntbio.net/bCIPA/index_PNAS_version.php">bCipa</a> </label>
-    <input type="radio" id="potapov" name="scoringEngine" value="potapov"> <label for="potapov"><a
+    <input type="radio" id="potapov" name="scoringEngine" value="Potapov"> <label for="potapov"><a
         href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004046">Potapov et al</a></label>
+  </div>
+
+  <div id="outputFormatChooser">
+    <p>Output format</p>
+    <input type="radio" id="binary" name="outputFormat" value="Binary" checked> <label
+      for="binary">Binary (.bin, .align.bin and .orientation.bin)</label>
+    <input type="radio" id="csv" name="outputFormat" value="CSV"> <label
+      for="csv">CSV</label>
   </div>
 
   <div>
