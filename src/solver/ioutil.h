@@ -155,10 +155,10 @@ float** allocate_matrix_pointers(float* data, int n)
 
 float **read_scores_binary(std::string score_file, std::string fasta_name)
 {
-	static InteractionMatrix im(score_file);
+	static InteractionMatrix im = InteractionMatrix::from_binary<score_t>(score_file);
 	float* score_storage = im[0];
 
-	size_t n_peptides = im.get_dimensions().first;
+	size_t n_peptides = im.size();
 
 	std::ifstream fasta_file(fasta_name);
 	assert(fasta_file.good());

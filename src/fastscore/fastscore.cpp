@@ -71,9 +71,9 @@ int main(int argc, char **argv) {
 	auto basename = options.basename;
 
 	PeptideSet ps(fasta_path);
-	InteractionMatrix im{ basename + ".bin", ps.size() };
-	OrientationMatrix om{ basename + ".orientation.bin", ps.size() };
-	AlignmentMatrix am{ basename + ".align.bin", ps.size() };
+	InteractionMatrix im(ps.size());
+	OrientationMatrix om(ps.size());
+	AlignmentMatrix am(ps.size());
 
 	switch (options.score_func)
 	{
