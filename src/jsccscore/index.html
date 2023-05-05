@@ -21,15 +21,15 @@
       </a></b></p>
 
   <div>
-    <p>Choose a file</p>
+    <h2>Choose a file</h2>
     <input type="file" id="filepicker" />
   </div>
 
 
   <div>
-    <label for="align">Alignment</label>
-    <input type="number" id="align" step=7 value=0 min=0>
-    <label for="align">largest shift to scan (in residues). Will scan ± number of residues. </label>
+    <label for="align"><h2>Alignment</h2></label>
+    <input type="number" id="align" step=1 value=0 min=0>
+    <label for="align">largest shift to scan (in heptads). Will scan ± number of heptads. </label>
   </div>
 
   <div>
@@ -38,7 +38,7 @@
   </div>
 
   <div id="orientationChooser">
-    <p>Orientation</p>
+    <h2>Orientation</h2>
     <input type="radio" id="parallel" name="orientation" value="Parallel" checked> <label
       for="parallel">Parallel</label>
     <input type="radio" id="antiparallel" name="orientation" value="Antiparallel"> <label
@@ -47,7 +47,7 @@
   </div>
 
   <div id="scoringEngineChooser">
-    <p>Scoring function</p>
+    <h2>Scoring function</h2>
     <input type="radio" id="icipa_nter_core" name="scoringEngine" value="iCIPA_nter_core" checked> <label
       for="icipa_nter_core">iCipa (icipa_nter_core)</label>
     <input type="radio" id="icipa_core_vert" name="scoringEngine" value="iCIPA_core_vert" checked> <label
@@ -59,7 +59,7 @@
   </div>
 
   <div id="outputFormatChooser">
-    <p>Output format</p>
+    <h2>Output format</h2>
     <input type="radio" id="binary" name="outputFormat" value="Binary" checked> <label
       for="binary">Binary (.bin, .align.bin and .orientation.bin)</label>
     <input type="radio" id="csv" name="outputFormat" value="CSV"> <label
@@ -67,8 +67,13 @@
   </div>
 
   <div>
-    <p>Run fastscore</p>
+    <h2>Run fastscore</h2>
     <input type="button" id="run" value="Run">
+  </div>
+
+  <div style="display:none" id="fastscore-cmdline-container">
+    <h3>Command line arguments</h3>
+    <p id="fastscore-cmdline"></p>
   </div>
 </body>
 

@@ -61,6 +61,8 @@ async function fastscoreCommandlineWrapper(
     const baseName = getBaseName(inputFileName);
 
     const argv = [inputFile.name, `--max-heptad-displacement=${maxHeptadDisplacement}`, `--truncate=${truncate ? 1 : 0}`, `--orientation=${Orientation[orientation]}`, `--score-func=${scoreFunction}`, `--output-format=${outputFormat}`];
+    
+    showCommandLine(argv);
     console.log(argv);
 
     callMain(argv);

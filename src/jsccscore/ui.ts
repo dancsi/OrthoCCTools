@@ -49,6 +49,17 @@ function getAppConfiguration( ): FastscoreArguments {
     };
 }
 
+function showCommandLine(args: string[]): void
+{
+    const cmdlineDiv = document.getElementById("fastscore-cmdline-container");
+    cmdlineDiv?.removeAttribute("style");
+    
+    const cmdlineEl = document.getElementById("fastscore-cmdline");
+    const cmdlineText = "fastscore " + args.join(" ");
+
+    cmdlineEl!.innerText = cmdlineText;
+}
+
 async function runButtonClick(): Promise<void>
 {
     console.log("Button click");
