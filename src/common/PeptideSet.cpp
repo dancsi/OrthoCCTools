@@ -27,6 +27,7 @@ void PeptideSet::read(std::filesystem::path path)
 			expect_sequence = true;
 			expect_id = false;
 			id = line.substr(1);
+			while (isspace(id.back())) id.pop_back();
 			break;
 		default:
 			expect_sequence = false;
