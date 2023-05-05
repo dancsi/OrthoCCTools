@@ -152,9 +152,7 @@ Available options:
 		cout << "Output basename is " << basename << endl;
 
 		cout << "Will test the following alignments:  ";
-		for_each(alignment.rbegin(), alignment.rend(), [&](int a) {cout << -a << " "; });
-		bool skip_zero = (alignment[0] == 0);
-		for_each(alignment.begin() + (skip_zero?1:0), alignment.end(), [&](int a) {cout << a << " "; });
+		for_each(alignment.begin(), alignment.end(), [&](int a) {cout << a << " "; });
 		cout << endl;
 
 		cout << "Considered orientations are " << [](ScoringOptions::Orientation o) {
