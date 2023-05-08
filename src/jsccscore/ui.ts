@@ -3,16 +3,27 @@
 function offerFileForDownload(file: File): void {
     const url = window.URL.createObjectURL(file);
 
+    const p = document.createElement('p');
     const a = document.createElement('a', {});
+    p.append(a);
 
-    a.setAttribute("style", "display:none");
     a.setAttribute("href", url);
     a.setAttribute("download", file.name);
 
-    document.body.appendChild(a);
-    a.click();
+    const currentTime = new Date();
+    a.innerText = `${file.name} (${currentTime.toLocaleString()})`;
 
-    window.URL.revokeObjectURL(url);
+    a.onclick = () => { 
+        window.URL.revokeObjectURL(url); 
+        a.setAttribute("class", "linkDisabled");
+        a.onclick = () => {
+            alert("You have already downloaded this file");
+        }
+    }
+
+    const downloadAreaDiv = document.getElementById("downloadarea");
+    downloadAreaDiv?.prepend(p);
+    downloadAreaDiv?.removeAttribute("style");
 }
 
 
