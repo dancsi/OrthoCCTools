@@ -43,6 +43,15 @@ interface FastscoreArguments {
     outputFormat: OutputFormat
 }
 
+function fileIsOutput(fileName: string, outputFormat: OutputFormat): boolean {
+    switch(outputFormat) {
+        case OutputFormat.Binary:
+            return fileName.endsWith('.bin');
+        case OutputFormat.CSV:
+            return fileName.endsWith('.csv');
+    }
+}
+
 async function fastscoreCommandlineWrapper(
     { 
         inputFile,
@@ -70,7 +79,7 @@ async function fastscoreCommandlineWrapper(
     const generatedFiles: File[] = [];
 
     for (const path of FS.readdir(".")) {
-        if (path.startsWith(baseName) && path != inputFileName) {
+        if (path.startsWith(baseName) && path != inputFileName && fileIsOutput(path, outputFormat)) {
             generatedFiles.push(new File([FS.readFile(path)], path));
         }
     }
